@@ -7,8 +7,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Request {
+  id   String @id @default(uuid())
+  link String
+
+  @@map("requests")
+}
+
 model Entity {
-  id         BigInt       @id @default(autoincrement()) @db.BigInt
+  id         String       @id @default(uuid())
   Media      Media[]
   Collection Collection[]
   EntityTag  EntityTag[]
@@ -17,7 +24,7 @@ model Entity {
 }
 
 model Tag {
-  id        BigInt      @id @default(autoincrement()) @db.BigInt
+  id        String      @id @default(uuid())
   name      String      @unique
   EntityTag EntityTag[]
 
@@ -26,30 +33,32 @@ model Tag {
 
 model EntityTag {
   entity   Entity @relation(fields: [entityId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  entityId BigInt @map("entity_id")
+  entityId String @map("entity_id")
   tag      Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  tagId    BigInt @map("tag_id")
+  tagId    String @map("tag_id")
 
   @@unique([entityId, tagId])
   @@map("entity_tags")
 }
 
 model CollectionMedia {
-  id           Int        @id @default(autoincrement())
+  id           String     @id @default(uuid())
   collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  collectionId BigInt     @map("collection_id") @db.BigInt
+  collectionId String     @map("collection_id")
   media        Media      @relation(fields: [mediaId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  mediaId      BigInt     @map("media_id") @db.BigInt
+  mediaId      String     @map("media_id")
+  order        Int
 
   @@map("collection_media")
 }
 
 model Collection {
-  id              BigInt            @id @default(autoincrement()) @db.BigInt
+  id              String            @id @default(uuid())
   entity          Entity            @relation(fields: [entityId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  entityId        BigInt            @map("entity_id") @db.BigInt
+  entityId        String            @map("entity_id")
   title           String            @unique
   type            String
+  author          String?
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @default(now()) @map("updated_at")
   CollectionMedia CollectionMedia[]
@@ -58,16 +67,29 @@ model Collection {
 }
 
 model Media {
-  id              BigInt            @id @default(autoincrement()) @db.BigInt
+  id              String            @id @default(uuid())
   entity          Entity            @relation(fields: [entityId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  entityId        BigInt            @map("entity_id") @db.BigInt
+  entityId        String            @map("entity_id")
+  fileName        String            @unique @map("file_name")
   link            String
   type            String
-  caption         String?
+  title           String            @default("")
+  author          String?
   originalLink    String?
+  previewId       String?           @unique
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @default(now()) @map("updated_at")
   CollectionMedia CollectionMedia[]
+  Video           Media?            @relation("displayImage", fields: [previewId], references: [id])
+  Photo           Media?            @relation("displayImage")
 
   @@map("medias")
+}
+
+model StorageSetting {
+  version BigInt  @id @default(autoincrement()) @db.BigInt
+  baseUrl String  @map("base_url")
+  current Boolean @default(false)
+
+  @@map("storage_settings")
 }
