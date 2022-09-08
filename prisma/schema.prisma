@@ -93,3 +93,13 @@ model StorageSetting {
 
   @@map("storage_settings")
 }
+
+model Activity {
+  id             String   @id @default(uuid())
+  actionType     String   @map("action_type")
+  actionItem     String   @map("action_item")
+  actionItemType String   @map("action_item_type")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("activities")
+}
