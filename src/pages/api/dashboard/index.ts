@@ -4,6 +4,7 @@ import { prisma } from "../../../utils/db";
 
 type Data = {
   mostRecentFiles: Array<Media>;
+  mediaCount: Array<any>;
 };
 
 export default async function handler(
@@ -24,7 +25,14 @@ export default async function handler(
       ],
     });
 
-    res.status(200).json({ mostRecentFiles });
+    const mediaCount = await prisma.media.groupBy({
+      by: ["type"],
+      _count: {
+        type: true,
+      },
+    });
+
+    res.status(200).json({ mostRecentFiles, mediaCount });
   } catch (err) {
     console.log(err);
     res.status(500).end();
