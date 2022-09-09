@@ -2,9 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import type { NextPage } from "next";
 import Link from "next/link";
 import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import Gauge from "../components/Gauge";
 import { useReaderContext } from "../context/readerContext";
 import { useState } from "react";
+dayjs.extend(relativeTime);
 
 const Home: NextPage = () => {
   const [infoType, setInfoType] = useState("details");
@@ -142,7 +144,31 @@ const Home: NextPage = () => {
                   </li>
                 </>
               ) : (
-                <div>Activ</div>
+                <>
+                  {data.latestActivity
+                    ? data.latestActivity.map((item) => (
+                        <li
+                          key={`activity-${item.id}`}
+                          className="mb-4 border py-2 px-4 rounded-lg"
+                        >
+                          <div>
+                            <span
+                              title={item.actionItem}
+                              className="block font-normal whitespace-nowrap text-ellipsis overflow-hidden"
+                            >
+                              {item.actionItem}
+                            </span>
+
+                            <div className="text-gray-500 font-normal text-sm">
+                              {item.actionType === "delete" ? "Deleted " : null}
+                              <span>{dayjs(item.createdAt).fromNow()}</span>
+                            </div>
+                          </div>
+                        </li>
+                      ))
+                    : null}
+                  {data.latestActivity.length === 0 ? <li>NO aci</li> : null}
+                </>
               )}
             </ul>
           </div>
