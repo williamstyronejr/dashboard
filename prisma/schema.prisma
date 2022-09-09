@@ -15,9 +15,9 @@ model Request {
 }
 
 model Entity {
-  id         String       @id @default(uuid())
-  Media      Media[]
-  Collection Collection[]
+  id         String      @id @default(uuid())
+  Media      Media?
+  Collection Collection?
   EntityTag  EntityTag[]
 
   @@map("entities")
@@ -55,7 +55,7 @@ model CollectionMedia {
 model Collection {
   id              String            @id @default(uuid())
   entity          Entity            @relation(fields: [entityId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  entityId        String            @map("entity_id")
+  entityId        String            @unique @map("entity_id")
   title           String            @unique
   type            String
   author          String?
@@ -69,11 +69,12 @@ model Collection {
 model Media {
   id              String            @id @default(uuid())
   entity          Entity            @relation(fields: [entityId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  entityId        String            @map("entity_id")
+  entityId        String            @unique @map("entity_id")
   fileName        String            @unique @map("file_name")
   link            String
   type            String
   title           String            @default("")
+  size            Int               @default(0)
   author          String?
   originalLink    String?
   previewId       String?           @unique
@@ -97,6 +98,7 @@ model StorageSetting {
 model Activity {
   id             String   @id @default(uuid())
   actionType     String   @map("action_type")
+  actionId       String   @map("action_id")
   actionItem     String   @map("action_item")
   actionItemType String   @map("action_item_type")
   createdAt      DateTime @default(now()) @map("created_at")
