@@ -28,7 +28,6 @@ const Gauge: React.FC<Props> = ({
   fillColor,
   className = "",
 }) => {
-  console.log(value);
   return (
     <div style={parentStyles} className={`${className}`}>
       <svg
