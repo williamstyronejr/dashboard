@@ -115,16 +115,15 @@ export function useReaderContext() {
         },
       });
 
-      fetch(`/api/collection?id=${id}`)
+      fetch(`/api/collection/${id}`)
         .then((res) => res.json())
         .then((data) => {
           dispatch({
             type: "setData",
-            payload: data.media,
+            payload: data.collection,
           });
         });
     } else {
-      console.log(data);
       dispatch({
         type: "addData",
         payload: data,
