@@ -69,15 +69,15 @@ const CollectionPage: NextPage = () => {
                     <button
                       className=""
                       type="button"
-                      onClick={() => AddItemToList(file.id, file.title, file)}
+                      onClick={() => AddItemToList(file.id, file.title)}
                     >
                       <div className="relative w-32 h-40">
                         <Image
                           className="rounded-lg"
                           priority={true}
                           layout="fill"
-                          src={file.Photo ? "" : ""}
-                          alt="Book covers"
+                          src={file.CollectionMedia[0].media.originalLink}
+                          alt="Collection Preview"
                         />
                       </div>
                       <div>{file.title}</div>
