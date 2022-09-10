@@ -1,10 +1,11 @@
-import { Media } from "@prisma/client";
+import { Activity, Media } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../../utils/db";
 
 type Data = {
   mostRecentFiles: Array<Media>;
   mediaCount: Array<any>;
+  latestActivity: Array<Activity>;
 };
 
 export default async function handler(
@@ -32,7 +33,16 @@ export default async function handler(
       },
     });
 
-    res.status(200).json({ mostRecentFiles, mediaCount });
+    const latestActivity = await prisma.activity.findMany({
+      take: 10,
+      orderBy: [
+        {
+          createdAt: "asc",
+        },
+      ],
+    });
+
+    res.status(200).json({ mostRecentFiles, mediaCount, latestActivity });
   } catch (err) {
     console.log(err);
     res.status(500).end();
