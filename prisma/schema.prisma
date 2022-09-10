@@ -7,13 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Request {
-  id   String @id @default(uuid())
-  link String
-
-  @@map("requests")
-}
-
 model Entity {
   id         String      @id @default(uuid())
   Media      Media?
@@ -75,6 +68,7 @@ model Media {
   type            String
   title           String            @default("")
   size            Int               @default(0)
+  hidden          Boolean           @default(false)
   author          String?
   originalLink    String?
   previewId       String?           @unique
