@@ -11,6 +11,10 @@ import { useRouter } from "next/router";
 import { useReaderContext } from "../../context/readerContext";
 import dayjs from "dayjs";
 
+function convertSize(fileSize: number) {
+  return `${fileSize.toPrecision(2)} MB`;
+}
+
 const MediaPage: NextPage = () => {
   const { query } = useRouter();
   const queryClient = useQueryClient();
@@ -21,7 +25,7 @@ const MediaPage: NextPage = () => {
 
   const { mutate: deleteEntity, isLoading: isDeleting } = useMutation(
     ["delete"],
-    async ({ entityId }: { entityId: string }) => {
+    async (entityId: string) => {
       const res = await fetch("/api/entity/delete", {
         headers: {
           "Content-Type": "application/json",
@@ -196,7 +200,7 @@ const MediaPage: NextPage = () => {
                   </div>
 
                   <div>
-                    <div className="my-1">10 MB</div>
+                    <div className="my-1">{convertSize(preview.size)}</div>
                     <div className="my-1">
                       {dayjs(preview.createdAt).format("MMM DD, YYYY")}
                     </div>
