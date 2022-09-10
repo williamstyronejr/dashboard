@@ -39,10 +39,10 @@ const Home: NextPage = () => {
                       </div>
 
                       <h4
-                        title={file.title}
+                        title={file.title || file.fileName}
                         className="flex-grow mx-2 whitespace-nowrap text-ellipsis overflow-hidden"
                       >
-                        {file.title}
+                        {file.title || file.fileName}
                       </h4>
 
                       <div className="whitespace-nowrap">
