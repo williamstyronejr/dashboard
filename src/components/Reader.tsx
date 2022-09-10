@@ -5,6 +5,7 @@ import {
   useMemo,
   useRef,
   useState,
+  FC,
 } from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -159,6 +160,75 @@ const AudioPlayer = ({ title, src }: { title: string; src: string }) => {
   );
 };
 
+const Slider: FC<{ collection: any; goToSlide: Function }> = ({
+  collection,
+  goToSlide,
+}) => {
+  const goNext = useCallback(() => {
+    if (collection.slide !== collection.data.CollectionMedia.length - 1)
+      goToSlide(collection.slide + 1);
+  }, [goToSlide, collection.slide, collection.data]);
+
+  const goPrev = useCallback(() => {
+    if (collection.slide !== 0) goToSlide(collection.slide - 1);
+  }, [goToSlide, collection.slide]);
+
+  useEffect(() => {
+    const eventHandler = (evt: KeyboardEvent) => {
+      if (evt.key === "ArrowRight") goNext();
+      if (evt.key === "ArrowLeft") goPrev();
+    };
+    document.addEventListener("keydown", eventHandler);
+
+    return () => document.removeEventListener("keydown", eventHandler);
+  }, [goNext, goPrev]);
+
+  return (
+    <div className="h-full">
+      <div className="relative w-full h-3/6">
+        {collection.data.CollectionMedia[
+          collection.slide
+        ].media.type.startsWith("image") ? (
+          <Image
+            priority={true}
+            layout="fill"
+            objectFit="contain"
+            src={
+              collection.data.CollectionMedia[collection.slide].media
+                .originalLink ||
+              collection.data.CollectionMedia[collection.slide].media.link
+            }
+            alt="Collection slide"
+          />
+        ) : (
+          <video
+            autoPlay
+            loop
+            className=""
+            src={
+              collection.data.CollectionMedia[collection.slide].media
+                .originalLink ||
+              collection.data.CollectionMedia[collection.slide].media.link
+            }
+          />
+        )}
+      </div>
+
+      <div>
+        <div></div>
+        <div>
+          <button type="button" onClick={() => goPrev()}>
+            Prev
+          </button>
+          <button type="button" onClick={() => goNext()}>
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Reader = () => {
   const { state, setSelected, goToSlide } = useReaderContext();
   const [fullScreen, setFullScreen] = useState(false);
@@ -167,6 +237,8 @@ const Reader = () => {
     () => (state.selected !== null ? state.list[state.selected] : null),
     [state.selected, state.list]
   );
+
+  console.log(selectedMedia?.data);
 
   return (
     <div
@@ -188,6 +260,10 @@ const Reader = () => {
             src={selectedMedia.data.link}
             title={selectedMedia.data.title}
           />
+        ) : null}
+
+        {selectedMedia && selectedMedia.data.type !== "audio" ? (
+          <Slider collection={selectedMedia} goToSlide={goToSlide} />
         ) : null}
       </div>
     </div>
