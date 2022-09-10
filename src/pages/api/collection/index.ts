@@ -48,11 +48,9 @@ export default async function requestHandler(
       skip,
       include: {
         CollectionMedia: {
-          orderBy: [
-            {
-              order: "asc",
-            },
-          ],
+          where: {
+            order: 0,
+          },
           include: {
             media: true,
           },
@@ -60,12 +58,10 @@ export default async function requestHandler(
       },
     });
 
-    res
-      .status(200)
-      .json({
-        collections,
-        nextPage: collections.length === take ? numPage + 1 : null,
-      });
+    res.status(200).json({
+      collections,
+      nextPage: collections.length === take ? numPage + 1 : null,
+    });
   } catch (err) {
     console.log(err);
     res.status(500).end();
