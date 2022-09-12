@@ -1,4 +1,10 @@
-import { createContext, useContext, useReducer, useMemo } from "react";
+import {
+  createContext,
+  useContext,
+  useReducer,
+  useMemo,
+  useCallback,
+} from "react";
 
 interface State {
   list: Array<{
@@ -131,12 +137,22 @@ export function useReaderContext() {
     }
   }
 
-  function setSelected(index: Number | null) {
-    dispatch({
-      type: "setSelected",
-      payload: index,
-    });
-  }
+  // function setSelected(index: Number | null) {
+  //   dispatch({
+  //     type: "setSelected",
+  //     payload: index,
+  //   });
+  // }
+
+  const setSelected = useCallback(
+    (index: Number | null) => {
+      dispatch({
+        type: "setSelected",
+        payload: index,
+      });
+    },
+    [dispatch]
+  );
 
   function goToSlide(slide: number) {
     dispatch({

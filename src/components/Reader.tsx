@@ -8,12 +8,23 @@ import {
   FC,
 } from "react";
 import Head from "next/head";
-import Link from "next/link";
 import Image from "next/image";
 import { useReaderContext } from "../context/readerContext";
+import { useRouter } from "next/router";
 
 function changeToTime(time: number) {
   return new Date(time * 1000).toISOString().substr(14, 5);
+}
+
+function processDescription(text: string) {
+  return text
+    .split("\n")
+    .filter((text) => text !== "")
+    .map((text, index) => (
+      <div className="block my-2" key={`description-${index}`}>
+        {text}
+      </div>
+    ));
 }
 
 const AudioPlayer = ({ title, src }: { title: string; src: string }) => {
@@ -184,8 +195,8 @@ const Slider: FC<{ collection: any; goToSlide: Function }> = ({
   }, [goNext, goPrev]);
 
   return (
-    <div className="h-full">
-      <div className="relative w-full h-3/6">
+    <div className="h-full flex flex-col flex-nowrap lg:flex-row">
+      <div className="relative shrink-0 w-full h-3/6 mb-6 lg:w-3/6 lg:h-full lg:mr-4 lg:py-4">
         {collection.data.CollectionMedia[
           collection.slide
         ].media.type.startsWith("image") ? (
@@ -214,13 +225,31 @@ const Slider: FC<{ collection: any; goToSlide: Function }> = ({
         )}
       </div>
 
-      <div>
-        <div></div>
-        <div>
-          <button type="button" onClick={() => goPrev()}>
+      <div className="flex flex-col flex-nowrap flex-grow lg:py-8">
+        <div className="flex-grow overflow-y-auto px-2 h-0">
+          {processDescription(
+            collection.data.CollectionMedia[collection.slide].media.title
+          )}
+        </div>
+
+        <div className="flex flex-row flex-nowrap shrink-0 mt-1">
+          <button
+            className="rounded-lg bg-sky-500 flex-grow py-2 mr-4"
+            type="button"
+            onClick={() => goPrev()}
+            disabled={collection.slide === 0}
+          >
             Prev
           </button>
-          <button type="button" onClick={() => goNext()}>
+
+          <button
+            className="rounded-lg bg-sky-500 flex-grow py-2"
+            type="button"
+            onClick={() => goNext()}
+            disabled={
+              collection.slide === collection.data.CollectionMedia.length - 1
+            }
+          >
             Next
           </button>
         </div>
@@ -229,9 +258,24 @@ const Slider: FC<{ collection: any; goToSlide: Function }> = ({
   );
 };
 
+const ImageViewer: FC<{ data: any }> = ({ data }) => {
+  return (
+    <div className="h-full">
+      <Image
+        priority={true}
+        layout="fill"
+        objectFit="contain"
+        src={data.originalLink || data.link}
+        alt="Media"
+      />
+    </div>
+  );
+};
+
 const Reader = () => {
   const { state, setSelected, goToSlide } = useReaderContext();
   const [fullScreen, setFullScreen] = useState(false);
+  const router = useRouter();
 
   const selectedMedia = useMemo(
     () => (state.selected !== null ? state.list[state.selected] : null),
@@ -240,16 +284,24 @@ const Reader = () => {
 
   console.log(selectedMedia?.data);
 
+  // Close reader on directory change
+  useEffect(() => {
+    setSelected(null);
+  }, [router.pathname, setSelected]);
+
   return (
     <div
-      className={`absolute bg-white z-50 
+      className={`absolute bg-custom-bg-off-light dark:bg-custom-bg-off-dark  text-custom-text-light dark:text-custom-text-dark z-50 
     ${selectedMedia ? "h-screen p-4" : "h-0"}
       ${fullScreen ? "w-screen right-0" : "w-full"}`}
     >
+      <Head>{selectedMedia ? <title>{selectedMedia.title}</title> : null}</Head>
       <div className="relative h-full">
         <button
           type="button"
-          className={`absolute  right-2 ${selectedMedia ? "block" : "hidden"}`}
+          className={`absolute z-20 right-2 ${
+            selectedMedia ? "block" : "hidden"
+          }`}
           onClick={() => setFullScreen(!fullScreen)}
         >
           <i className="fas fa-expand" />
@@ -262,7 +314,11 @@ const Reader = () => {
           />
         ) : null}
 
-        {selectedMedia && selectedMedia.data.type !== "audio" ? (
+        {selectedMedia && selectedMedia.data.type === "image" ? (
+          <ImageViewer data={selectedMedia.data} />
+        ) : null}
+
+        {selectedMedia && selectedMedia.data.type === "story" ? (
           <Slider collection={selectedMedia} goToSlide={goToSlide} />
         ) : null}
       </div>

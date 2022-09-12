@@ -30,7 +30,7 @@ export default async function requestHandler(
     }
 
     const where: any = { type };
-    if (q) where.caption = { contains: q };
+    if (q) where.title = { contains: q };
     if (tags)
       where.tags = { every: { name: { in: tags.toString().split(",") } } };
 

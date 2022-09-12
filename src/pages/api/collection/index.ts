@@ -47,6 +47,15 @@ export default async function requestHandler(
       take,
       skip,
       include: {
+        entity: {
+          include: {
+            EntityTag: {
+              include: {
+                tag: true,
+              },
+            },
+          },
+        },
         CollectionMedia: {
           where: {
             order: 0,
@@ -57,6 +66,8 @@ export default async function requestHandler(
         },
       },
     });
+
+    console.log(collections[0]);
 
     res.status(200).json({
       collections,
