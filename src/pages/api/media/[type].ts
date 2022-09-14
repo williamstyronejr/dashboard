@@ -1,9 +1,19 @@
 import { prisma } from "../../../utils/db";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { Media } from "@prisma/client";
+
+type ResponseData = {
+  nextPage: number | null;
+  results: Array<Media & { Photo: Media | null }>;
+};
+
+type InputError = {
+  message?: string;
+};
 
 export default async function requestHandler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse<ResponseData | InputError>
 ) {
   const {
     query: { page, limit, type, tags, q },
@@ -34,7 +44,7 @@ export default async function requestHandler(
     if (tags)
       where.tags = { every: { name: { in: tags.toString().split(",") } } };
 
-    const media = await prisma.media.findMany({
+    const results = await prisma.media.findMany({
       where,
       skip,
       take,
@@ -43,7 +53,10 @@ export default async function requestHandler(
       },
     });
 
-    res.json({ media, nextPage: media.length === take ? numPage + 1 : null });
+    res.json({
+      results,
+      nextPage: results.length === take ? numPage + 1 : null,
+    });
   } catch (err) {
     console.log(err);
     res
