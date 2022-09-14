@@ -4,7 +4,7 @@ import { Collection, CollectionMedia, Media } from "@prisma/client";
 
 type Data = {
   nextPage: number | null;
-  collections: Array<
+  results: Array<
     Collection & {
       CollectionMedia: (CollectionMedia & { media: Media })[];
     }
@@ -43,7 +43,7 @@ export default async function requestHandler(
         .send({ message: "Page and limit must be numbers" });
     }
 
-    const collections = await prisma.collection.findMany({
+    const results = await prisma.collection.findMany({
       take,
       skip,
       include: {
@@ -67,11 +67,9 @@ export default async function requestHandler(
       },
     });
 
-    console.log(collections[0]);
-
     res.status(200).json({
-      collections,
-      nextPage: collections.length === take ? numPage + 1 : null,
+      results,
+      nextPage: results.length === take ? numPage + 1 : null,
     });
   } catch (err) {
     console.log(err);
