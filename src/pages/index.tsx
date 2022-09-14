@@ -18,10 +18,10 @@ const Home: NextPage = () => {
   });
 
   return (
-    <section className="flex flex-row flex-nowrap font-bold p-2 w-full">
-      <div className="flex-grow w-0">
-        <div className="bg-white p-4">
-          <h3 className="mb-4">Recent Files</h3>
+    <section className="flex flex-col-reverse md:flex-row flex-nowrap flex-grow font-bold p-2 overflow-y-auto">
+      <div className="block md:flex-grow md:w-0 mt-6 md:mt-0 px-0 md:px-4 bg-custom-bg-light dark:bg-custom-bg-dark text-custom-text-light dark:text-custom-text-dark">
+        <div className="">
+          <h3 className="my-4 text-">Recent Files</h3>
 
           <ul>
             {data && data.mostRecentFiles
@@ -45,7 +45,7 @@ const Home: NextPage = () => {
                         {file.title || file.fileName}
                       </h4>
 
-                      <div className="whitespace-nowrap">
+                      <div className="hidden md:block whitespace-nowrap">
                         {dayjs(file.createAt).format("ddd, DD MMM YYYY")}
                       </div>
                     </button>
@@ -58,7 +58,7 @@ const Home: NextPage = () => {
         </div>
       </div>
 
-      <aside className=" w-80 shrink-0 ml-6 bg-white pt-4 px-6">
+      <aside className="shrink-0 w-full md:w-80 ml-0 md:ml-6 pt-4 px-6 bg-custom-bg-light dark:bg-custom-bg-dark text-custom-text-light dark:text-custom-text-dark">
         <div>Your Cloud</div>
 
         <div>
