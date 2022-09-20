@@ -8,21 +8,8 @@ import Image from "next/image";
 import useInfiniteScroll from "react-infinite-scroll-hook";
 import { useState } from "react";
 import { useReaderContext } from "../context/readerContext";
+import { convertSize, capitalizeFirst } from "../utils/utils";
 import dayjs from "dayjs";
-
-function convertSize(fileSize: number) {
-  const kiloBytes = fileSize / 1000;
-  if (kiloBytes < 1024) {
-    return `${kiloBytes.toFixed(2)} KB`;
-  } else if (kiloBytes % (1024 * 1024) !== kiloBytes) {
-    return `${(kiloBytes / (1024 * 1024)).toFixed(2)} GB`;
-  }
-  return `${(kiloBytes / 1024).toFixed(2)} MB`;
-}
-
-function capitalizeFirst(str: string) {
-  return `${str.charAt(0).toUpperCase()}${str.slice(1)}`;
-}
 
 const FileList: FC<{
   queryUrl: string;
