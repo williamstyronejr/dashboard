@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import type { NextPage } from "next";
 import Link from "next/link";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Gauge from "../components/Gauge";
 import { useReaderContext } from "../context/readerContext";
-import { useState } from "react";
+import { convertSize } from "../utils/utils";
 dayjs.extend(relativeTime);
 
 const Home: NextPage = () => {
@@ -104,73 +105,83 @@ const Home: NextPage = () => {
           </div>
 
           <div>
-            <ul className="mt-4 overflow-y-auto">
-              {infoType === "details" ? (
-                <>
-                  <li className="flex flex-row flex-nowrap items-center mb-4 border py-2 px-4 rounded-lg">
-                    <i className="fas fa-file-audio mr-4 text-4xl" />
-                    <div className="flex-grow">
-                      <div className="font-medium">Audio</div>
-                      <span className="text-gray-500 font-normal text-sm">
-                        100 Files
-                      </span>
-                    </div>
+            {data ? (
+              <ul className="mt-4 overflow-y-auto">
+                {infoType === "details" ? (
+                  <>
+                    <li className="flex flex-row flex-nowrap items-center mb-4 border py-2 px-4 rounded-lg">
+                      <i className="fas fa-file-audio mr-4 text-4xl" />
+                      <div className="flex-grow">
+                        <div className="font-medium">Audio</div>
+                        <span className="text-gray-500 font-normal text-sm">
+                          {data.groupStats.audio.count} Files
+                        </span>
+                      </div>
 
-                    <div className="text-gray-500">25 GB</div>
-                  </li>
+                      <div className="text-gray-500">
+                        {convertSize(data.groupStats.audio.size)}
+                      </div>
+                    </li>
 
-                  <li className="flex flex-row flex-nowrap items-center mb-4 border py-2 px-4 rounded-lg">
-                    <i className="fas fa-file-image mr-4 text-4xl" />
-                    <div className="flex-grow">
-                      <div className="font-medium">Photos</div>
-                      <span className="text-gray-500 font-normal text-sm">
-                        100 Files
-                      </span>
-                    </div>
+                    <li className="flex flex-row flex-nowrap items-center mb-4 border py-2 px-4 rounded-lg">
+                      <i className="fas fa-file-image mr-4 text-4xl" />
+                      <div className="flex-grow">
+                        <div className="font-medium">Photos</div>
+                        <span className="text-gray-500 font-normal text-sm">
+                          {data.groupStats.image.count} Files
+                        </span>
+                      </div>
 
-                    <div className="text-gray-500">25 GB</div>
-                  </li>
+                      <div className="text-gray-500">
+                        {convertSize(data.groupStats.image.size)}
+                      </div>
+                    </li>
 
-                  <li className="flex flex-row flex-nowrap items-center mb-4 border py-2 px-4 rounded-lg">
-                    <i className="fas fa-file-video mr-4 text-4xl" />
-                    <div className="flex-grow">
-                      <div className="font-medium">Videos</div>
-                      <span className="text-gray-500 font-normal text-sm">
-                        100 Files
-                      </span>
-                    </div>
+                    <li className="flex flex-row flex-nowrap items-center mb-4 border py-2 px-4 rounded-lg">
+                      <i className="fas fa-file-video mr-4 text-4xl" />
+                      <div className="flex-grow">
+                        <div className="font-medium">Videos</div>
+                        <span className="text-gray-500 font-normal text-sm">
+                          {data.groupStats.video.count} Files
+                        </span>
+                      </div>
 
-                    <div className="text-gray-500">25 GB</div>
-                  </li>
-                </>
-              ) : (
-                <>
-                  {data.latestActivity
-                    ? data.latestActivity.map((item) => (
-                        <li
-                          key={`activity-${item.id}`}
-                          className="mb-4 border py-2 px-4 rounded-lg"
-                        >
-                          <div>
-                            <span
-                              title={item.actionItem}
-                              className="block font-normal whitespace-nowrap text-ellipsis overflow-hidden"
-                            >
-                              {item.actionItem}
-                            </span>
+                      <div className="text-gray-500">
+                        {convertSize(data.groupStats.video.size)}
+                      </div>
+                    </li>
+                  </>
+                ) : (
+                  <>
+                    {data.latestActivity
+                      ? data.latestActivity.map((item) => (
+                          <li
+                            key={`activity-${item.id}`}
+                            className="mb-4 border py-2 px-4 rounded-lg"
+                          >
+                            <div>
+                              <span
+                                title={item.actionItem}
+                                className="block font-normal whitespace-nowrap text-ellipsis overflow-hidden"
+                              >
+                                {item.actionItem}
+                              </span>
 
-                            <div className="text-gray-500 font-normal text-sm">
-                              {item.actionType === "delete" ? "Deleted " : null}
-                              <span>{dayjs(item.createdAt).fromNow()}</span>
+                              <div className="text-gray-500 font-normal text-sm">
+                                {item.actionType === "delete"
+                                  ? "Deleted "
+                                  : null}
+                                <span>{dayjs(item.createdAt).fromNow()}</span>
+                              </div>
                             </div>
-                          </div>
-                        </li>
-                      ))
-                    : null}
-                  {data.latestActivity.length === 0 ? <li>NO aci</li> : null}
-                </>
-              )}
-            </ul>
+                          </li>
+                        ))
+                      : null}
+                    {data.latestActivity.length === 0 ? <li>NO aci</li> : null}
+                  </>
+                )}
+              </ul>
+            ) : null}
           </div>
         </div>
       </aside>
