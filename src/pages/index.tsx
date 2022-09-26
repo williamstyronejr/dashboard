@@ -59,25 +59,25 @@ const Home: NextPage = () => {
         </div>
       </div>
 
-      <aside className="shrink-0 w-full md:w-80 ml-0 md:ml-6 pt-4 px-6 bg-custom-bg-light dark:bg-custom-bg-dark text-custom-text-light dark:text-custom-text-dark">
+      <aside className="flex flex-col flex-nowrap shrink-0 w-full md:w-80 ml-0 md:ml-6 pt-4 px-6 bg-custom-bg-light dark:bg-custom-bg-dark text-custom-text-light dark:text-custom-text-dark">
         <div>Your Cloud</div>
 
         <div>
-          <Gauge value={80} />
+          <Gauge value={data ? data.usedSpace / data.totalSpace : 0} />
           <div className="flex flex-row flex-nowrap justify-between">
             <div>
-              <div className="">40 GB</div>
+              <div className="">{convertSize(data ? data.usedSpace : 0)}</div>
               <span className="text-gray-500 font-normal">Used Space</span>
             </div>
 
             <div>
-              <div>120 GB</div>
+              <div>{convertSize(data ? data.totalSpace : 0)}</div>
               <span className="text-gray-500 font-normal">Total Space</span>
             </div>
           </div>
         </div>
 
-        <div>
+        <div className="flex flex-col flex-nowrap h-0 flex-grow">
           <div className="">
             <button
               className={`inline-block w-6/12 border-b-2 py-3 ${
@@ -104,9 +104,9 @@ const Home: NextPage = () => {
             </button>
           </div>
 
-          <div>
+          <div className="px-2 overflow-y-auto">
             {data ? (
-              <ul className="mt-4 overflow-y-auto">
+              <ul className="mt-4">
                 {infoType === "details" ? (
                   <>
                     <li className="flex flex-row flex-nowrap items-center mb-4 border py-2 px-4 rounded-lg">
@@ -177,7 +177,9 @@ const Home: NextPage = () => {
                           </li>
                         ))
                       : null}
-                    {data.latestActivity.length === 0 ? <li>NO aci</li> : null}
+                    {data.latestActivity.length === 0 ? (
+                      <li>No Activities</li>
+                    ) : null}
                   </>
                 )}
               </ul>
