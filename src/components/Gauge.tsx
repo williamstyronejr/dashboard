@@ -59,7 +59,7 @@ const Gauge: React.FC<Props> = ({
           pathLength="100"
           fill="none"
           strokeLinecap="butt"
-          strokeDasharray={`${value < 0 ? 0 : value} 100`}
+          strokeDasharray={`${value <= 0 ? 0 : Math.max(1, value)} 100`}
           stroke={fillColor || "#e9ad61"}
         />
       </svg>
