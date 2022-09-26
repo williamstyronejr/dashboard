@@ -1,4 +1,4 @@
-import { Activity, Media, Prisma } from "@prisma/client";
+import { Activity, Media } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../../utils/db";
 
@@ -7,6 +7,8 @@ type Data = {
   mediaCount: Array<any>;
   latestActivity: Array<Activity>;
   groupStats: Record<string, { size: number; count: number }>;
+  totalSpace: number;
+  usedSpace: number;
 };
 
 export default async function handler(
@@ -66,16 +68,23 @@ export default async function handler(
       },
     };
 
+    let usedSpace = 0;
     stats.forEach((typeStats) => {
+      usedSpace += typeStats._sum.size || 0;
       groupStats[typeStats.type] = {
         size: typeStats._sum.size || 0,
         count: typeStats._count,
       };
     });
 
-    res
-      .status(200)
-      .json({ mostRecentFiles, mediaCount, latestActivity, groupStats });
+    res.status(200).json({
+      mostRecentFiles,
+      mediaCount,
+      latestActivity,
+      groupStats,
+      totalSpace: 125829120000, // 120 GB
+      usedSpace,
+    });
   } catch (err) {
     console.log(err);
     res.status(500).end();
