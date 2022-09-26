@@ -222,7 +222,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <ReaderProvider>
-        <div className="flex flex-row flex-nowrap h-full">
+        <div className="flex flex-row flex-nowrap h-full text-custom-text-light dark:text-custom-text-dark">
           <Aside />
 
           <main className="flex flex-col flex-nowrap flex-grow bg-custom-bg-off-light dark:bg-custom-bg-off-dark relative w-0">
