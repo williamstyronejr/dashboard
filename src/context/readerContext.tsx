@@ -5,6 +5,7 @@ import {
   useMemo,
   useCallback,
 } from "react";
+import { isInArray } from "../utils/utils";
 
 interface State {
   list: Array<{
@@ -111,6 +112,8 @@ export function useReaderContext() {
   const { state, dispatch } = context;
 
   function AddItemToList(id: string, title: string, data = null) {
+    if (isInArray(state.list, id)) return;
+
     if (!data) {
       dispatch({
         type: "AddItem",
@@ -136,13 +139,6 @@ export function useReaderContext() {
       });
     }
   }
-
-  // function setSelected(index: Number | null) {
-  //   dispatch({
-  //     type: "setSelected",
-  //     payload: index,
-  //   });
-  // }
 
   const setSelected = useCallback(
     (index: Number | null) => {
