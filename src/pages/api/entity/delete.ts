@@ -19,23 +19,25 @@ export default async function handler(
   } = req;
 
   if (method !== "DELETE") return res.status(404).end();
-  if (!entityId)
+  if (!entityId || entityId === "")
     return res.status(400).json({ entityId: "Must provide entity id" });
 
   try {
-    const media = await prisma.media.findUnique({
+    const ids = entityId.split(",");
+
+    const medias = await prisma.media.findMany({
       where: {
-        entityId,
+        entityId: { in: ids },
       },
     });
 
-    const collection = await prisma.media.findUnique({
+    const collections = await prisma.collection.findMany({
       where: {
-        entityId,
+        entityId: { in: ids },
       },
     });
 
-    if (!collection && !media) {
+    if (collections.length === 0 && medias.length === 0) {
       return res.status(400).json({ entityId: "Entity does not exist" });
     }
 
@@ -45,14 +47,35 @@ export default async function handler(
       }, 5000)
     );
 
-    await prisma.activity.create({
-      data: {
-        actionType: "delete",
-        actionItem: media ? media.title : collection?.title || "",
-        actionId: media ? media.id : collection?.id || "",
-        actionItemType: media ? "media" : "collection",
-      },
+    let activityProms: Array<Promise<any>> = [];
+
+    collections.forEach((collection) => {
+      activityProms.push(
+        prisma.activity.create({
+          data: {
+            actionType: "delete",
+            actionItem: collection.title,
+            actionId: collection.id,
+            actionItemType: "collection",
+          },
+        })
+      );
     });
+
+    medias.forEach((media) => {
+      activityProms.push(
+        prisma.activity.create({
+          data: {
+            actionType: "delete",
+            actionItem: media.title,
+            actionId: media.id,
+            actionItemType: "media",
+          },
+        })
+      );
+    });
+
+    await Promise.all(activityProms);
     return res.status(200).json({ success: true });
   } catch (err) {
     console.log(err);
