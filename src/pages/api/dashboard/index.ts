@@ -24,7 +24,7 @@ export default async function handler(
       take: 10,
       orderBy: [
         {
-          createdAt: "asc",
+          createdAt: "desc",
         },
       ],
     });
@@ -40,7 +40,7 @@ export default async function handler(
       take: 10,
       orderBy: [
         {
-          createdAt: "asc",
+          createdAt: "desc",
         },
       ],
     });
