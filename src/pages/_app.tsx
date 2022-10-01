@@ -27,11 +27,11 @@ const Aside = () => {
       <div
         className={`absolute ${
           menu ? "block" : "hidden"
-        } md:hidden top-0 left-0 w-screen h-screen bg-black/80 z-20`}
+        } md:hidden top-0 left-0 w-screen h-screen bg-black/80 z-40`}
       />
 
       <div
-        className={`flex flex-col flex-nowrap h-full z-50 absolute md:relative top-0 left-0  dark:border-white/10 bg-custom-bg-light dark:bg-custom-bg-dark text-custom-text-light dark:text-custom-text-dark ${
+        className={`flex flex-col flex-nowrap h-full z-50 absolute md:relative top-0 left-0 dark:border-white/10 bg-custom-bg-light dark:bg-custom-bg-dark text-custom-text-light dark:text-custom-text-dark ${
           menu ? "w-52" : "w-16"
         }`}
       >
