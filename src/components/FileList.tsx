@@ -70,8 +70,6 @@ const FileList: FC<{
         `${queryUrl}?page=${pageParam}&limit=10&${queryParams}`
       );
 
-      console.log("Made it here");
-      if (res.status === 500) throw new Error();
       const body = await res.json();
       return body;
     },
@@ -81,9 +79,6 @@ const FileList: FC<{
     }
   );
 
-  console.log();
-  console.log({ isError });
-  console.log({ error });
   const [sentryRef] = useInfiniteScroll({
     loading: isLoading || isFetchingNextPage,
     hasNextPage: !!hasNextPage,
@@ -93,7 +88,7 @@ const FileList: FC<{
   });
 
   const selectHandler = (evt: MouseEvent, file: any) => {
-    if (evt.ctrlKey) {
+    if (evt.ctrlKey || evt.altKey) {
       setSelectedFiles(deleteOrInsert(selectedFiles, file));
     } else {
       setSelectedFiles([file]);
@@ -366,32 +361,47 @@ const FileList: FC<{
 
                 {selectedFiles.length === 1 ? (
                   <div className="">
-                    <div className="flex flex-row flex-nowrap">
-                      <div className="text-gray-500 my-1">Size</div>
-                      <div className="my-1">
+                    <div className="flex flex-row flex-nowrap my-2">
+                      <div className="w-3/6 text-gray-500">Size</div>
+                      <div className="w-3/6 text-right">
                         {convertSize(selectedFiles[0].size)}
                       </div>
                     </div>
 
-                    <div className="flex flex-row flex-nowrap">
-                      <div className="text-gray-500 my-1">Create</div>{" "}
-                      <div className="my-1">
+                    <div className="flex flex-row flex-nowrap my-2">
+                      <div className="w-3/6 text-gray-500">Create</div>{" "}
+                      <div className="w-3/6 text-right">
                         {dayjs(selectedFiles[0].createdAt).format(
                           "MMM DD, YYYY"
                         )}
                       </div>
                     </div>
 
-                    <div className="flex flex-row flex-nowrap">
-                      <div className="text-gray-500 my-1">Modified</div>{" "}
-                      <div className="my-1">
+                    <div className="flex flex-row flex-nowrap my-2">
+                      <div className="w-3/6 text-gray-500">Modified</div>{" "}
+                      <div className="w-3/6 text-right">
                         {dayjs(selectedFiles[0].updatedAt).format(
                           "MMM DD, YYYY"
                         )}
                       </div>
                     </div>
                   </div>
-                ) : null}
+                ) : (
+                  <div>
+                    <div className="flex flex-row flex-nowrap my-2">
+                      <div className="w-3/6 text-gray-500">Size </div>
+                      <div className="w-3/6 text-right">
+                        {convertSize(
+                          selectedFiles.reduce(
+                            (prev, curr) =>
+                              curr.size ? curr.size + prev : prev,
+                            0
+                          )
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </>
           ) : null}
