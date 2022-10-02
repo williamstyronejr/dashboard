@@ -9,9 +9,10 @@ datasource db {
 
 model Entity {
   id         String      @id @default(uuid())
-  Media      Media?
   Collection Collection?
   EntityTag  EntityTag[]
+  Media      Media?
+  Favorite   Favorite?
 
   @@map("entities")
 }
@@ -25,10 +26,10 @@ model Tag {
 }
 
 model EntityTag {
-  entity   Entity @relation(fields: [entityId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   entityId String @map("entity_id")
-  tag      Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   tagId    String @map("tag_id")
+  entity   Entity @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  tag      Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@unique([entityId, tagId])
   @@map("entity_tags")
@@ -36,24 +37,24 @@ model EntityTag {
 
 model CollectionMedia {
   id           String     @id @default(uuid())
-  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   collectionId String     @map("collection_id")
-  media        Media      @relation(fields: [mediaId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   mediaId      String     @map("media_id")
   order        Int
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  media        Media      @relation(fields: [mediaId], references: [id], onDelete: Cascade)
 
   @@map("collection_media")
 }
 
 model Collection {
   id              String            @id @default(uuid())
-  entity          Entity            @relation(fields: [entityId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   entityId        String            @unique @map("entity_id")
   title           String            @unique
   type            String
-  author          String?
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @default(now()) @map("updated_at")
+  author          String?
+  entity          Entity            @relation(fields: [entityId], references: [id], onDelete: Cascade)
   CollectionMedia CollectionMedia[]
 
   @@map("collections")
@@ -61,28 +62,28 @@ model Collection {
 
 model Media {
   id              String            @id @default(uuid())
-  entity          Entity            @relation(fields: [entityId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   entityId        String            @unique @map("entity_id")
-  fileName        String            @unique @map("file_name")
   link            String
   type            String
-  title           String            @default("")
-  size            Int               @default(0)
-  hidden          Boolean           @default(false)
-  author          String?
   originalLink    String?
-  previewId       String?           @unique
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @default(now()) @map("updated_at")
-  CollectionMedia CollectionMedia[]
+  author          String?
+  fileName        String            @unique @map("file_name")
+  previewId       String?           @unique
+  size            Int               @default(0)
+  title           String            @default("")
+  hidden          Boolean           @default(false)
+  entity          Entity            @relation(fields: [entityId], references: [id], onDelete: Cascade)
   Video           Media?            @relation("displayImage", fields: [previewId], references: [id])
+  CollectionMedia CollectionMedia[]
   Photo           Media?            @relation("displayImage")
 
   @@map("medias")
 }
 
 model StorageSetting {
-  version BigInt  @id @default(autoincrement()) @db.BigInt
+  version BigInt  @id @default(autoincrement())
   baseUrl String  @map("base_url")
   current Boolean @default(false)
 
@@ -98,4 +99,12 @@ model Activity {
   createdAt      DateTime @default(now()) @map("created_at")
 
   @@map("activities")
+}
+
+model Favorite {
+  entity    Entity   @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  entityId  String   @unique @map("entity_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("favorites")
 }
