@@ -50,6 +50,11 @@ export default async function requestHandler(
       take,
       include: {
         Photo: true,
+        entity: {
+          include: {
+            Favorite: true,
+          },
+        },
       },
     });
 

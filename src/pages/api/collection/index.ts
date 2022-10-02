@@ -49,6 +49,7 @@ export default async function requestHandler(
       include: {
         entity: {
           include: {
+            Favorite: true,
             EntityTag: {
               include: {
                 tag: true,
