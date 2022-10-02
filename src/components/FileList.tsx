@@ -15,7 +15,6 @@ import {
   deleteOrInsert,
 } from "../utils/utils";
 import Modal from "./Modal";
-import Preview from "../components/Preview";
 
 const FileList: FC<{
   queryUrl: string;
@@ -24,8 +23,7 @@ const FileList: FC<{
 }> = ({ queryUrl, heading, queryParams = "" }) => {
   const queryClient = useQueryClient();
   const [listMode, setListMode] = useState("grid");
-  const [previewVisible, setPreviewVisible] = useState(false);
-  const [preview, setPreview] = useState<any>(null);
+  const [infoVisible, setInfoVisible] = useState(false);
   const [deleteMenu, setDeleteMenu] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<Array<any>>([]);
   const { AddItemToList } = useReaderContext();
@@ -47,7 +45,30 @@ const FileList: FC<{
     {
       onSuccess: (data) => {
         if (data.success) {
-          setPreview(null);
+          setDeleteMenu(false);
+          queryClient.invalidateQueries(["media", queryUrl]);
+        }
+      },
+    }
+  );
+
+  const { mutate: updateFavorite, isLoading: isUpdating } = useMutation(
+    ["favorite"],
+    async ({ entityId, deleting }: { entityId: string; deleting: boolean }) => {
+      const res = await fetch("/api/favorites", {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ entityId, deleting }),
+        method: "POST",
+      });
+
+      const body = await res.json();
+      return body;
+    },
+    {
+      onSuccess: (data) => {
+        if (data.success) {
           setDeleteMenu(false);
           queryClient.invalidateQueries(["media", queryUrl]);
         }
@@ -102,9 +123,9 @@ const FileList: FC<{
           {heading ? capitalizeFirst(heading) : ""}
         </h2>
 
-        {preview ? (
+        {selectedFiles.length ? (
           <div className="mr-6 pr-6 border-r">
-            <div className="relative">
+            <div className="">
               <button
                 className="text-xl"
                 type="button"
@@ -116,33 +137,21 @@ const FileList: FC<{
               {deleteMenu ? (
                 <Modal
                   onClose={() => setDeleteMenu(false)}
-                  onSuccess={() => deleteEntity(preview.entityId)}
+                  onSuccess={() =>
+                    deleteEntity(
+                      selectedFiles.reduce(
+                        (prev, curr) =>
+                          prev === ""
+                            ? curr.entityId
+                            : `${prev},${curr.entityId}`,
+                        ""
+                      )
+                    )
+                  }
                 >
                   <div>Are you sure you want to delete?</div>
                 </Modal>
               ) : null}
-
-              <div
-                className={`${
-                  deleteMenu ? "block" : "hidden"
-                } absolute z-30 bg-sky-500 rounded-lg right-1 w-40 py-4 text-left`}
-              >
-                <button
-                  className="w-full"
-                  type="button"
-                  onClick={() => deleteEntity(preview.entityId)}
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? (
-                    <>
-                      <i className="fas fa-spinner animate-spin mr-2" />
-                      <span>Deleting</span>
-                    </>
-                  ) : (
-                    "Delete"
-                  )}
-                </button>
-              </div>
             </div>
           </div>
         ) : null}
@@ -164,7 +173,7 @@ const FileList: FC<{
             className="text-xl ml-4"
             type="button"
             onClick={() => {
-              setPreviewVisible((old) => !old);
+              setInfoVisible((old) => !old);
             }}
           >
             <i className="fas fa-info-circle" />
@@ -194,6 +203,23 @@ const FileList: FC<{
                       } `}
                     >
                       <button
+                        className="absolute w-20 h-20 z-10 bg-sky-500"
+                        type="button"
+                        onClick={() =>
+                          updateFavorite({
+                            entityId: file.entityId,
+                            deleting: !!file.entity.Favorite,
+                          })
+                        }
+                      >
+                        {file.entity.Favorite ? (
+                          <i className="fas fa-heart" />
+                        ) : (
+                          <i className="far fa-heart" />
+                        )}
+                      </button>
+
+                      <button
                         className={`w-full border-2 p-1 border-transparent rounded-lg ${
                           selectedFiles.length &&
                           isInArray(selectedFiles, file.id)
@@ -207,7 +233,6 @@ const FileList: FC<{
                         type="button"
                         onClick={(evt) => selectHandler(evt, file)}
                         onDoubleClick={() => {
-                          setPreview(null);
                           AddItemToList(file.id, file.title, file);
                         }}
                       >
@@ -297,18 +322,18 @@ const FileList: FC<{
 
         <aside
           className={`flex flex-col flex-nowrap h-full absolute z-10 right-0 md:relative  bg-custom-bg-light dark:bg-custom-bg-dark text-custom-text-light dark:text-custom-text-dark ${
-            previewVisible ? "w-72" : "w-0"
+            infoVisible ? "w-72" : "w-0"
           }`}
         >
-          {previewVisible && !selectedFiles.length ? <div></div> : null}
+          {infoVisible && !selectedFiles.length ? <div></div> : null}
 
-          {previewVisible && selectedFiles.length ? (
+          {infoVisible && selectedFiles.length ? (
             <>
               <div className="relative text-right shrink-0">
                 <button
                   className="inline mr-4 text-xl"
                   type="button"
-                  onClick={() => setPreviewVisible(false)}
+                  onClick={() => setInfoVisible(false)}
                 >
                   X
                 </button>
