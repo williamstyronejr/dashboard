@@ -125,9 +125,9 @@ const FileList: FC<{
 
         {selectedFiles.length ? (
           <div className="mr-6 pr-6 border-r">
-            <div className="">
+            <div className="text-xl">
               <button
-                className="text-xl"
+                className="mr-4"
                 type="button"
                 onClick={() => setDeleteMenu(!deleteMenu)}
               >
@@ -198,12 +198,12 @@ const FileList: FC<{
                   page.results.map((file) => (
                     <li
                       key={`type-${file.id}`}
-                      className={`block ${
+                      className={`block group relative ${
                         listMode === "grid" ? "m-4" : "mt-4"
                       } `}
                     >
                       <button
-                        className="absolute w-20 h-20 z-10 bg-sky-500"
+                        className="hidden group-hover:block absolute top-1 left-1 z-10 hover:bg-slate-500 rounded-full py-2 px-3"
                         type="button"
                         onClick={() =>
                           updateFavorite({
