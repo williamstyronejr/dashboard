@@ -15,6 +15,8 @@ import {
   deleteOrInsert,
 } from "../utils/utils";
 import Modal from "./Modal";
+import Preview from "./Preview";
+import { useRouter } from "next/router";
 
 const FileList: FC<{
   queryUrl: string;
@@ -22,9 +24,11 @@ const FileList: FC<{
   queryParams?: string;
 }> = ({ queryUrl, heading, queryParams = "" }) => {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const [listMode, setListMode] = useState("grid");
   const [infoVisible, setInfoVisible] = useState(false);
   const [deleteMenu, setDeleteMenu] = useState(false);
+  const [preview, setPreview] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState<Array<any>>([]);
   const { AddItemToList } = useReaderContext();
 
@@ -118,6 +122,7 @@ const FileList: FC<{
 
   return (
     <div className="flex flex-col flex-nowrap h-full flex-grow">
+      <Preview preview={preview} onClose={() => setPreview(null)} />
       <header className="flex flex-row flex-nowrap mx-6 py-2 border-b border-black/10 dark:border-white/10 ">
         <h2 className="flex-grow font-extrabold text-3xl">
           {heading ? capitalizeFirst(heading) : ""}
@@ -233,7 +238,8 @@ const FileList: FC<{
                         type="button"
                         onClick={(evt) => selectHandler(evt, file)}
                         onDoubleClick={() => {
-                          AddItemToList(file.id, file.title, file);
+                          if (file.link) return setPreview(file);
+                          return router.push(`/collections/${file.id}`);
                         }}
                       >
                         <div
