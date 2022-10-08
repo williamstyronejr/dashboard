@@ -1,12 +1,16 @@
-import { prisma } from "../../../utils/db";
+import { prisma } from "../../../../utils/db";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { Collection, CollectionMedia, Media } from "@prisma/client";
+import { Collection, Entity, EntityTag, Tag } from "@prisma/client";
 
 type Data = {
   collection:
     | null
     | (Collection & {
-        CollectionMedia: (CollectionMedia & { media: Media })[];
+        entity: Entity & {
+          EntityTag: (EntityTag & {
+            tag: Tag;
+          })[];
+        };
       });
 };
 
@@ -31,14 +35,13 @@ export default async function requestHandler(
         id: id.toString(),
       },
       include: {
-        CollectionMedia: {
-          orderBy: [
-            {
-              order: "asc",
-            },
-          ],
+        entity: {
           include: {
-            media: true,
+            EntityTag: {
+              include: {
+                tag: true,
+              },
+            },
           },
         },
       },
