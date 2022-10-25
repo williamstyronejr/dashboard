@@ -7,7 +7,6 @@ import {
   useEffect,
 } from "react";
 import Image from "next/image";
-import { useRouter } from "next/router";
 import Head from "next/head";
 
 function changeToTime(time: number) {
@@ -16,7 +15,7 @@ function changeToTime(time: number) {
 
 const ImageViewer: FC<{ data: any }> = ({ data }) => {
   return (
-    <div className="h-full">
+    <div className="flex-grow relative">
       <Image
         priority={true}
         layout="fill"
@@ -170,13 +169,26 @@ const AudioPlayer = ({ title, src }: { title: string; src: string }) => {
     </>
   );
 };
+const VideoViewer: FC<{ data: any }> = ({ data }) => {
+  return (
+    <div className="flex-grow h-0">
+      <video
+        autoPlay
+        loop
+        controls
+        className="mx-auto h-full"
+        poster={data.Photo.originalLink || data.Photo.link}
+        src={data.originalLink || data.link}
+      />
+    </div>
+  );
+};
 
 const Preview: React.FC<{
   onClose: Function;
   preview: any;
 }> = ({ preview, onClose }) => {
   const [fullScreen, setFullScreen] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     const keyHandle = (evt: KeyboardEvent) => {
@@ -191,23 +203,37 @@ const Preview: React.FC<{
 
   return (
     <div
-      className={`absolute z-50  bg-custom-bg-off-light dark:bg-custom-bg-off-light
+      className={`absolute z-50 bg-custom-bg-off-light dark:bg-custom-bg-off-dark
       ${preview ? "h-full p-4" : "h-0"}
-        ${fullScreen ? "w-screen right-0" : "w-full"}
+        ${fullScreen ? "w-screen h-screen bottom-0 right-0" : "w-full"}
       `}
     >
       <Head>
         {preview ? <title>{preview.title || "Preview"}</title> : null}
       </Head>
 
-      <div className="relative h-full">
-        <button
-          type="button"
-          className={`absolute z-20 right-2 ${preview ? "block" : "hidden"}`}
-          onClick={() => setFullScreen(!fullScreen)}
-        >
-          <i className="fas fa-expand" />
-        </button>
+      <div className="flex flex-col flex-nowrap relative h-full">
+        <div className="flex flex-row flex-nowrap justify-between shrink-0">
+          <button
+            type="button"
+            className={`text-2xl  ${
+              preview ? "block" : "hidden"
+            } hover:text-custom-text-off-light hover:text-custom-text-off-dark`}
+            onClick={() => setFullScreen(!fullScreen)}
+          >
+            <i className="fas fa-expand" />
+          </button>
+
+          <button
+            type="button"
+            className={`text-2xl ${
+              preview ? "block" : "hidden"
+            } hover:text-custom-text-off-light hover:text-custom-text-off-dark`}
+            onClick={() => onClose()}
+          >
+            <i className="far fa-window-close" />
+          </button>
+        </div>
 
         {preview && preview.type === "audio" ? (
           <AudioPlayer src={preview.link} title={preview.title} />
@@ -215,6 +241,10 @@ const Preview: React.FC<{
 
         {preview && preview.type === "image" ? (
           <ImageViewer data={preview} />
+        ) : null}
+
+        {preview && preview.type === "video" ? (
+          <VideoViewer data={preview} />
         ) : null}
       </div>
     </div>
