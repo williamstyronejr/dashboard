@@ -53,6 +53,11 @@ export default async function requestHandler(
         entity: {
           include: {
             Favorite: true,
+            EntityTag: {
+              include: {
+                tag: true,
+              },
+            },
           },
         },
       },
