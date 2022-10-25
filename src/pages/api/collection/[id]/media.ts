@@ -51,7 +51,6 @@ export default async function requestHandler(
       take,
       include: {
         Photo: true,
-        CollectionMedia: true,
         entity: {
           include: {
             Favorite: true,
