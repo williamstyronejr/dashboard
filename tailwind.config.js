@@ -13,7 +13,7 @@ module.exports = {
           "text-light": "#000000",
           "text-dark": "#ffffff",
           "text-off-light": "#f9f9f9",
-          "text-off-dark": "#000000",
+          "text-off-dark": "#c7c7c7",
         },
       },
     },
