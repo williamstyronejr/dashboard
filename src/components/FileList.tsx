@@ -1,4 +1,4 @@
-import { FC, MouseEvent, useState } from "react";
+import { FC, MouseEvent, useEffect, useState } from "react";
 import {
   useInfiniteQuery,
   useMutation,
@@ -7,7 +7,6 @@ import {
 import Image from "next/image";
 import dayjs from "dayjs";
 import useInfiniteScroll from "react-infinite-scroll-hook";
-import { useReaderContext } from "../context/readerContext";
 import {
   convertSize,
   capitalizeFirst,
@@ -28,9 +27,17 @@ const FileList: FC<{
   const [listMode, setListMode] = useState("grid");
   const [infoVisible, setInfoVisible] = useState(false);
   const [deleteMenu, setDeleteMenu] = useState(false);
+  const [optionsMenu, setOptionsMenu] = useState(false);
   const [preview, setPreview] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState<Array<any>>([]);
-  const { AddItemToList } = useReaderContext();
+
+  // Close all headers menu when selected files change
+  useEffect(() => {
+    if (selectedFiles.length === 0) {
+      setOptionsMenu(false);
+      setDeleteMenu(false);
+    }
+  }, [selectedFiles]);
 
   const { mutate: deleteEntity, isLoading: isDeleting } = useMutation(
     ["delete"],
@@ -120,11 +127,16 @@ const FileList: FC<{
     }
   };
 
+  console.log(selectedFiles);
+
   return (
     <div className="flex flex-col flex-nowrap h-full flex-grow">
       <Preview preview={preview} onClose={() => setPreview(null)} />
       <header className="flex flex-row flex-nowrap mx-6 py-2 border-b border-black/10 dark:border-white/10 ">
-        <h2 className="flex-grow font-extrabold text-3xl">
+        <h2
+          title={heading || ""}
+          className="flex-grow w-0 font-extrabold text-3xl mr-10 whitespace-nowrap text-ellipsis overflow-x-hidden"
+        >
           {heading ? capitalizeFirst(heading) : ""}
         </h2>
 
@@ -156,6 +168,25 @@ const FileList: FC<{
                 >
                   <div>Are you sure you want to delete?</div>
                 </Modal>
+              ) : null}
+
+              <button
+                type="button"
+                className=""
+                onClick={() => {
+                  setOptionsMenu(!optionsMenu);
+                }}
+              >
+                +
+              </button>
+
+              {optionsMenu ? (
+                <div className="absolute bg-custom-bg-light dark:bg-custom-bg-dark py-2 px-4">
+                  <button type="button" className="">
+                    Create Collection
+                  </button>
+                  <button type="button">Download</button>
+                </div>
               ) : null}
             </div>
           </div>
@@ -247,7 +278,7 @@ const FileList: FC<{
                             listMode === "grid" ? "w-full" : "w-48"
                           } h-48 mx-auto shrink-0`}
                         >
-                          {file.type === "story" ? (
+                          {file.CollectionMedia ? (
                             <Image
                               className="rounded-lg"
                               priority={true}
@@ -260,6 +291,18 @@ const FileList: FC<{
                               alt="Media Preview"
                             />
                           ) : null}
+
+                          {file.type === "video" ? (
+                            <Image
+                              className="rounded-lg"
+                              priority={true}
+                              layout="fill"
+                              objectFit="contain"
+                              src={file.Photo.originalLink || file.Photo.link}
+                              alt="Media Preview"
+                            />
+                          ) : null}
+
                           {file.type === "image" ? (
                             <Image
                               className="rounded-lg"
@@ -270,8 +313,25 @@ const FileList: FC<{
                               alt="Media Preview"
                             />
                           ) : null}
-                        </div>
-
+                        </div>{" "}
+                        {file.entity && file.entity.EntityTag ? (
+                          <ul
+                            className={`${
+                              listMode === "grid"
+                                ? "hidden"
+                                : "flex flex-row flex-wrap"
+                            }`}
+                          >
+                            {file.entity.EntityTag.map((entityTag) => (
+                              <li
+                                key={`tag-${file.id}-${entityTag.tag.id}`}
+                                className="bg-sky-500 rounded py-2 px-4 mr-4 mb-4"
+                              >
+                                {capitalizeFirst(entityTag.tag.name)}
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null}
                         <div
                           className={`${
                             listMode === "grid"
@@ -280,25 +340,6 @@ const FileList: FC<{
                           }`}
                         >
                           {file.title || file.fileName}
-
-                          {file.entity && file.entity.EntityTag ? (
-                            <ul
-                              className={`${
-                                listMode === "grid"
-                                  ? "hidden"
-                                  : "flex flex-row flex-wrap"
-                              }`}
-                            >
-                              {file.entity.EntityTag.map((entityTag) => (
-                                <li
-                                  key={`tag-${file.id}-${entityTag.tag.id}`}
-                                  className="bg-sky-500 rounded py-2 px-4 mr-4 mb-4"
-                                >
-                                  {capitalizeFirst(entityTag.tag.name)}
-                                </li>
-                              ))}
-                            </ul>
-                          ) : null}
                         </div>
                       </button>
                     </li>
@@ -392,6 +433,24 @@ const FileList: FC<{
 
                 {selectedFiles.length === 1 ? (
                   <div className="">
+                    {selectedFiles[0].entity &&
+                    selectedFiles[0].entity.EntityTag ? (
+                      <div className="mt-2 w-full">
+                        <ul className="flex flex-row flex-wrap px-2">
+                          {selectedFiles[0].entity.EntityTag.map(
+                            (entityTag) => (
+                              <li
+                                key={`tag-${selectedFiles[0].id}-${entityTag.tag.id}`}
+                                className="bg-sky-500 rounded p-2 mr-4 mb-4 text-xs"
+                              >
+                                {capitalizeFirst(entityTag.tag.name)}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    ) : null}
+
                     <div className="flex flex-row flex-nowrap my-2">
                       <div className="w-3/6 text-gray-500">Size</div>
                       <div className="w-3/6 text-right">
