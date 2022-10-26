@@ -10,6 +10,7 @@ module.exports = {
           "bg-dark": "#111111",
           "bg-off-light": "#ffffff",
           "bg-off-dark": "#1f1e1e",
+          "bg-btn-hover": "#5f6368",
           "text-light": "#000000",
           "text-dark": "#ffffff",
           "text-off-light": "#f9f9f9",

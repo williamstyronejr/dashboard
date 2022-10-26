@@ -376,10 +376,11 @@ const FileList: FC<{
 
           {infoVisible && selectedFiles.length ? (
             <>
-              <div className="relative text-right shrink-0">
+              <div className="relative text-right shrink-0 py-2">
                 <button
-                  className="inline mr-4 text-xl"
+                  className="inline mr-4 px-3 py-1 text-xl rounded-full transition hover:bg-custom-bg-btn-hover"
                   type="button"
+                  title="Close Info"
                   onClick={() => setInfoVisible(false)}
                 >
                   X
