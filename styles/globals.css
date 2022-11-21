@@ -21,3 +21,9 @@ a {
 * {
   box-sizing: border-box;
 }
+
+/* Needed due to NextJS 13 adding divs for scroll restoration */
+[data-nextjs-scroll-focus-boundary] {
+  height: 100%;
+  width: 100%;
+}
