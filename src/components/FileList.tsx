@@ -1,3 +1,4 @@
+"use client";
 import { FC, MouseEvent, useEffect, useState } from "react";
 import {
   useInfiniteQuery,
@@ -7,15 +8,16 @@ import {
 import Image from "next/image";
 import dayjs from "dayjs";
 import useInfiniteScroll from "react-infinite-scroll-hook";
+import { useRouter } from "next/navigation";
+import { useSpring, animated } from "@react-spring/web";
+import Modal from "./Modal";
+import Preview from "./Preview";
 import {
   convertSize,
   capitalizeFirst,
   isInArray,
   deleteOrInsert,
 } from "../utils/utils";
-import Modal from "./Modal";
-import Preview from "./Preview";
-import { useRouter } from "next/router";
 
 const FileList: FC<{
   queryUrl: string;
@@ -30,6 +32,23 @@ const FileList: FC<{
   const [optionsMenu, setOptionsMenu] = useState(false);
   const [preview, setPreview] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState<Array<any>>([]);
+  const [springsStyles, springApi] = useSpring(() => {
+    from: {
+      width: "0px";
+    }
+  });
+
+  const handleClick = () => {
+    springApi.start({
+      from: {
+        width: "1px",
+      },
+      to: {
+        width: "100px",
+      },
+      reverse: infoVisible,
+    });
+  };
 
   // Close all headers menu when selected files change
   useEffect(() => {
@@ -209,6 +228,7 @@ const FileList: FC<{
             className="text-xl ml-4"
             type="button"
             onClick={() => {
+              handleClick();
               setInfoVisible((old) => !old);
             }}
           >
@@ -280,10 +300,9 @@ const FileList: FC<{
                         >
                           {file.CollectionMedia ? (
                             <Image
-                              className="rounded-lg"
+                              fill
+                              className="rounded-lg object-contain"
                               priority={true}
-                              layout="fill"
-                              objectFit="contain"
                               src={
                                 file.CollectionMedia[0].media.originalLink ||
                                 file.CollectionMedia[0].media.originalLink
@@ -294,10 +313,9 @@ const FileList: FC<{
 
                           {file.type === "video" ? (
                             <Image
-                              className="rounded-lg"
+                              fill
+                              className="rounded-lg object-contain"
                               priority={true}
-                              layout="fill"
-                              objectFit="contain"
                               src={file.Photo.originalLink || file.Photo.link}
                               alt="Media Preview"
                             />
@@ -305,15 +323,27 @@ const FileList: FC<{
 
                           {file.type === "image" ? (
                             <Image
-                              className="rounded-lg"
+                              className="rounded-lg object-contain"
+                              fill
                               priority={true}
-                              layout="fill"
-                              objectFit="contain"
                               src={file.originalLink || file.link}
                               alt="Media Preview"
                             />
                           ) : null}
-                        </div>{" "}
+
+                          {file.type === "audio" ? (
+                            <Image
+                              className="rounded-lg object-contain"
+                              fill
+                              priority={true}
+                              src={
+                                file.Photo ? file.Photo.link : "/audioIcon.png"
+                              }
+                              alt="Media Preview"
+                            />
+                          ) : null}
+                        </div>
+
                         {file.entity && file.entity.EntityTag ? (
                           <ul
                             className={`${
@@ -367,11 +397,12 @@ const FileList: FC<{
           </ul>
         </div>
 
-        <aside
-          className={`flex flex-col flex-nowrap h-full absolute z-10 right-0 md:relative  bg-custom-bg-light dark:bg-custom-bg-dark text-custom-text-light dark:text-custom-text-dark ${
-            infoVisible ? "w-72" : "w-0"
-          }`}
+        <animated.aside
+          style={springsStyles}
+          className={`flex flex-col flex-nowrap h-full absolute z-10 right-0 md:relative  bg-custom-bg-light dark:bg-custom-bg-dark text-custom-text-light dark:text-custom-text-dark 
+          `}
         >
+          {/* // ${infoVisible ? "w-72" : "w-0"} */}
           {infoVisible && !selectedFiles.length ? <div></div> : null}
 
           {infoVisible && selectedFiles.length ? (
@@ -392,10 +423,9 @@ const FileList: FC<{
                   {selectedFiles.length === 1 &&
                   selectedFiles[0].type === "image" ? (
                     <Image
-                      className="rounded-lg"
+                      fill
+                      className="rounded-lg object-contain"
                       priority={true}
-                      layout="fill"
-                      objectFit="contain"
                       src={
                         selectedFiles[0].originalLink || selectedFiles[0].link
                       }
@@ -406,10 +436,9 @@ const FileList: FC<{
                   {selectedFiles.length === 1 &&
                   selectedFiles[0].type === "story" ? (
                     <Image
-                      className="rounded-lg"
+                      fill
+                      className="rounded-lg object-contain"
                       priority={true}
-                      layout="fill"
-                      objectFit="contain"
                       src={
                         selectedFiles[0].CollectionMedia[0].media
                           .originalLink ||
@@ -496,7 +525,7 @@ const FileList: FC<{
               </div>
             </>
           ) : null}
-        </aside>
+        </animated.aside>
       </div>
     </div>
   );

@@ -1,9 +1,10 @@
+"use client";
 import { useQuery } from "@tanstack/react-query";
-import { NextPage } from "next";
-import Link from "next/link";
 import { useState } from "react";
+import Link from "next/link";
+import { Tag } from "@prisma/client";
 
-const TagListPage: NextPage = () => {
+const TagListPage = () => {
   const [page, setPage] = useState(0);
 
   const { data } = useQuery(
@@ -12,13 +13,13 @@ const TagListPage: NextPage = () => {
       const res = await fetch(`/api/tags?page=${page}&limit=10`);
 
       const body = await res.json();
-      return body;
+      return body as { results: Array<Tag> };
     },
     { keepPreviousData: true }
   );
 
   return (
-    <section className="">
+    <>
       <header className="font-extrabold">Tags</header>
 
       <div>
@@ -26,10 +27,11 @@ const TagListPage: NextPage = () => {
           {data
             ? data.results.map((tag) => (
                 <li key={tag.id} className="">
-                  <Link href={`/tags/${tag.id}`}>
-                    <a className="block h-full w-full text-center py-4">
-                      {tag.name}
-                    </a>
+                  <Link
+                    href={`/tags/${tag.id}`}
+                    className="block h-full w-full text-center py-4"
+                  >
+                    {tag.name}
                   </Link>
                 </li>
               ))
@@ -56,7 +58,7 @@ const TagListPage: NextPage = () => {
           </button>
         </div>
       </div>
-    </section>
+    </>
   );
 };
 

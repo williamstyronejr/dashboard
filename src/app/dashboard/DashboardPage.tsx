@@ -1,15 +1,14 @@
+"use client";
+import { FC, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import type { NextPage } from "next";
-import Link from "next/link";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import Gauge from "../components/Gauge";
-import { useReaderContext } from "../context/readerContext";
-import { convertSize } from "../utils/utils";
+import Gauge from "../../components/Gauge";
+import { useReaderContext } from "../../context/readerContext";
+import { convertSize } from "../../utils/utils";
 dayjs.extend(relativeTime);
 
-const Home: NextPage = () => {
+const DashboardPage = () => {
   const [infoType, setInfoType] = useState("details");
   const { AddItemToList } = useReaderContext();
   const { data, isFetching } = useQuery(["dashboard"], async () => {
@@ -26,7 +25,7 @@ const Home: NextPage = () => {
 
           <ul>
             {data && data.mostRecentFiles
-              ? data.mostRecentFiles.map((file) => (
+              ? data.mostRecentFiles.map((file: any) => (
                   <li key={`recent-${file.id}`} className="">
                     <button
                       className="flex flex-row flex-nowrap items-center w-full text-left"
@@ -154,7 +153,7 @@ const Home: NextPage = () => {
                 ) : (
                   <>
                     {data.latestActivity
-                      ? data.latestActivity.map((item) => (
+                      ? data.latestActivity.map((item: any) => (
                           <li
                             key={`activity-${item.id}`}
                             className="mb-4 border py-2 px-4 rounded-lg"
@@ -191,4 +190,4 @@ const Home: NextPage = () => {
   );
 };
 
-export default Home;
+export default DashboardPage;

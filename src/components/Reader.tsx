@@ -1,3 +1,4 @@
+"use client";
 import {
   SyntheticEvent,
   useCallback,
@@ -10,7 +11,7 @@ import {
 import Head from "next/head";
 import Image from "next/image";
 import { useReaderContext } from "../context/readerContext";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 function changeToTime(time: number) {
   return new Date(time * 1000).toISOString().substr(14, 5);

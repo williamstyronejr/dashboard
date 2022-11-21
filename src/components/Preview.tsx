@@ -8,6 +8,7 @@ import {
 } from "react";
 import Image from "next/image";
 import Head from "next/head";
+import { useSpring } from "@react-spring/web";
 
 function changeToTime(time: number) {
   return new Date(time * 1000).toISOString().substr(14, 5);
