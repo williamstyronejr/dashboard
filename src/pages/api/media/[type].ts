@@ -1,6 +1,6 @@
-import { prisma } from "../../../utils/db";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Media } from "@prisma/client";
+import { prisma } from "../../../utils/db";
 
 type ResponseData = {
   nextPage: number | null;
@@ -39,7 +39,8 @@ export default async function requestHandler(
         .send({ message: "Page and limit must be numbers" });
     }
 
-    const where: any = { type };
+    const where: any = {};
+    if (typeof type === "string" && type !== "all") where.type = type;
     if (q) where.title = { contains: q };
     if (tags)
       where.tags = { every: { name: { in: tags.toString().split(",") } } };
