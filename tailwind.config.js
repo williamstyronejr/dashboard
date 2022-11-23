@@ -17,6 +17,10 @@ module.exports = {
           "text-off-dark": "#c7c7c7",
         },
       },
+      boxShadow: {
+        round:
+          "box-shadow: 0 0 15px rgb(0 0 0 / 15%), 0 0 1px 1px rgb(0 0 0 / 10%)",
+      },
     },
   },
   plugins: [],
