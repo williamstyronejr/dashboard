@@ -1,5 +1,13 @@
 "use client";
-import { FC, MouseEvent, useEffect, useState } from "react";
+import {
+  ChangeEvent,
+  FC,
+  MouseEvent,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import {
   useInfiniteQuery,
   useMutation,
@@ -12,12 +20,169 @@ import { useRouter } from "next/navigation";
 import { useSpring, animated } from "@react-spring/web";
 import Modal from "./Modal";
 import Preview from "./Preview";
+import Menu from "./ui/Menu";
 import {
   convertSize,
   capitalizeFirst,
   isInArray,
   deleteOrInsert,
 } from "../utils/utils";
+import {
+  useAddItemsToCollection,
+  useCreateCollection,
+  useSearchCollections,
+} from "../hooks/api/media";
+
+const HeaderButton: FC<{ children: ReactNode; onClick: () => void }> = ({
+  children,
+  onClick,
+  ...restProps
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="rounded-full px-2 py-1 mx-1 hover:bg-slate-500/10"
+    {...restProps}
+  >
+    {children}
+  </button>
+);
+
+const AddToMenu: FC<{ selected: Array<any> }> = ({ selected }) => {
+  const [visible, setVisible] = useState(false);
+  const [createMenu, setCreateMenu] = useState(false);
+  const [collectionTitle, setCollectionTitle] = useState("");
+  const [search, setSearch] = useState("");
+
+  const onChange = useCallback(
+    (evt: ChangeEvent<HTMLInputElement>) => {
+      if (evt.target.name === "search") {
+        setSearch(evt.target.value);
+      } else {
+        setCollectionTitle(evt.target.value);
+      }
+    },
+    [setSearch, setCollectionTitle]
+  );
+
+  const { data: collectionList } = useSearchCollections(search);
+  const { mutate: addToCollection } = useAddItemsToCollection({
+    onSettled: () => {
+      setVisible(false);
+    },
+  });
+  const { mutate: createCollection } = useCreateCollection({
+    onSettled: () => {
+      setVisible(false);
+    },
+  });
+
+  useEffect(() => {
+    if (selected.length === 0) setVisible(false);
+  }, [selected]);
+
+  return (
+    <div className="inline-block relative">
+      <HeaderButton onClick={() => setVisible((old) => !old)}>
+        <i className="fas fa-images" />
+      </HeaderButton>
+
+      <Menu
+        visible={visible}
+        className="absolute w-48 z-20 py-2 -left-20 mt-4 shadow-custom-shadow-round rounded-md bg-custom-bg-light dark:bg-custom-bg-dark"
+      >
+        <div>
+          <div className="relative">
+            <button
+              className={`${
+                createMenu ? "block" : "hidden"
+              } absolute left-3 -top-1 `}
+              type="button"
+              onClick={() => setCreateMenu(false)}
+            >
+              <i className="fas fa-chevron-left" />
+            </button>
+            <h3 className="text-center font-bold text-sm">Add Files To</h3>
+            <hr className="mt-2" />
+          </div>
+
+          {!createMenu ? (
+            <div className="w-full h-44 overflow-y-auto">
+              <div className="mx-2">
+                <input
+                  className="w-full text-sm"
+                  type="text"
+                  name="search"
+                  value={search}
+                  onChange={onChange}
+                />
+              </div>
+
+              <hr className="mt-1" />
+
+              <button
+                onClick={() => setCreateMenu((old) => !old)}
+                type="button"
+                className="w-full text-left px-2 py-2 whitespace-nowrap text-ellipsis overflow-hidden text-sm hover:bg-sky-500/10"
+              >
+                Create Collection
+              </button>
+
+              <hr />
+
+              {collectionList
+                ? collectionList.map(({ id, title }) => (
+                    <button
+                      className="w-full text-left px-2 py-2 whitespace-nowrap text-ellipsis overflow-hidden text-sm hover:bg-sky-500/10"
+                      key={`add-item-to-${id}`}
+                      type="button"
+                      onClick={() => {
+                        addToCollection({
+                          id,
+                          mediaIds: selected.map((media) => media.id).join(","),
+                        });
+                      }}
+                    >
+                      {title}
+                    </button>
+                  ))
+                : null}
+            </div>
+          ) : (
+            <div className="flex flex-col flex-nowrap w-full h-44 px-2 text-base justify-between">
+              <input
+                className="w-full px-2 mt-2 text-base"
+                value={collectionTitle}
+                onChange={onChange}
+                placeholder="New Collection Name"
+              />
+
+              <div className="flex flex-row flex-nowrap justify-around">
+                <button
+                  className=""
+                  type="button"
+                  onClick={() =>
+                    createCollection({ title: collectionTitle, mediaIds: "" })
+                  }
+                >
+                  Create
+                </button>
+
+                <button
+                  className=""
+                  type="button"
+                  onClick={() => setCreateMenu((old) => !old)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </Menu>
+    </div>
+  );
+};
 
 const FileList: FC<{
   queryUrl: string;
@@ -29,7 +194,6 @@ const FileList: FC<{
   const [listMode, setListMode] = useState("grid");
   const [infoVisible, setInfoVisible] = useState(false);
   const [deleteMenu, setDeleteMenu] = useState(false);
-  const [optionsMenu, setOptionsMenu] = useState(false);
   const [preview, setPreview] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState<Array<any>>([]);
   const [springsStyles, springApi] = useSpring(() => {
@@ -47,13 +211,13 @@ const FileList: FC<{
         width: "100px",
       },
       reverse: infoVisible,
+      reset: false,
     });
   };
 
   // Close all headers menu when selected files change
   useEffect(() => {
     if (selectedFiles.length === 0) {
-      setOptionsMenu(false);
       setDeleteMenu(false);
     }
   }, [selectedFiles]);
@@ -146,8 +310,6 @@ const FileList: FC<{
     }
   };
 
-  console.log(selectedFiles);
-
   return (
     <div className="flex flex-col flex-nowrap h-full flex-grow">
       <Preview preview={preview} onClose={() => setPreview(null)} />
@@ -160,15 +322,11 @@ const FileList: FC<{
         </h2>
 
         {selectedFiles.length ? (
-          <div className="mr-6 pr-6 border-r">
+          <div className="">
             <div className="text-xl">
-              <button
-                className="mr-4"
-                type="button"
-                onClick={() => setDeleteMenu(!deleteMenu)}
-              >
+              <HeaderButton onClick={() => setDeleteMenu(!deleteMenu)}>
                 <i className="fas fa-trash-alt" />
-              </button>
+              </HeaderButton>
 
               {deleteMenu ? (
                 <Modal
@@ -189,51 +347,30 @@ const FileList: FC<{
                 </Modal>
               ) : null}
 
-              <button
-                type="button"
-                className=""
-                onClick={() => {
-                  setOptionsMenu(!optionsMenu);
-                }}
-              >
-                +
-              </button>
-
-              {optionsMenu ? (
-                <div className="absolute bg-custom-bg-light dark:bg-custom-bg-dark py-2 px-4">
-                  <button type="button" className="">
-                    Create Collection
-                  </button>
-                  <button type="button">Download</button>
-                </div>
-              ) : null}
+              <AddToMenu selected={selectedFiles} />
             </div>
           </div>
         ) : null}
 
         <div className="">
-          <button
-            className="text-xl"
-            type="button"
+          <HeaderButton
             onClick={() => setListMode(listMode === "grid" ? "list" : "grid")}
           >
             {listMode === "grid" ? (
-              <i className="fas fa-list" />
+              <i className="fas fa-list text-xl" />
             ) : (
-              <i className="fas fa-th-large" />
+              <i className="fas fa-th-large text-xl" />
             )}
-          </button>
+          </HeaderButton>
 
-          <button
-            className="text-xl ml-4"
-            type="button"
+          <HeaderButton
             onClick={() => {
               handleClick();
               setInfoVisible((old) => !old);
             }}
           >
-            <i className="fas fa-info-circle" />
-          </button>
+            <i className="fas fa-info-circle text-xl" />
+          </HeaderButton>
         </div>
       </header>
 
