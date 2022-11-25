@@ -35,7 +35,7 @@ export function useAddItemsToCollection(options = {}) {
     async ({ mediaIds, id }: { id: string; mediaIds: string }) => {
       const res = await fetch(`/api/collection/${id}/media`, {
         method: "POST",
-        body: JSON.stringify({ mediaIds, task: "add" }),
+        body: JSON.stringify({ mediaIds }),
         headers: {
           "Content-Type": "application/json",
         },
@@ -53,7 +53,7 @@ export function useCreateCollection(options = {}) {
     async ({ title, mediaIds }: { title: string; mediaIds: string }) => {
       const res = await fetch("/api/collection", {
         method: "POST",
-        body: JSON.stringify({ title: title, mediaIds }),
+        body: JSON.stringify({ title, mediaIds }),
         headers: {
           "Content-Type": "application/json",
         },

@@ -74,6 +74,7 @@ const AddToMenu: FC<{ selected: Array<any> }> = ({ selected }) => {
   const { mutate: createCollection } = useCreateCollection({
     onSettled: () => {
       setVisible(false);
+      setCreateMenu(false);
     },
   });
 
@@ -161,9 +162,13 @@ const AddToMenu: FC<{ selected: Array<any> }> = ({ selected }) => {
                 <button
                   className=""
                   type="button"
-                  onClick={() =>
-                    createCollection({ title: collectionTitle, mediaIds: "" })
-                  }
+                  onClick={() => {
+                    if (collectionTitle.trim() === "") return;
+                    createCollection({
+                      title: collectionTitle,
+                      mediaIds: selected.map((media) => media.id).join(","),
+                    });
+                  }}
                 >
                   Create
                 </button>

@@ -46,28 +46,36 @@ export default async function requestHandler(
             .send({ message: "Page and limit must be numbers" });
         }
 
-        const results = await prisma.media.findMany({
+        const results = await prisma.collectionMedia.findMany({
           where: {
-            CollectionMedia: {
-              every: {
-                collectionId: id?.toString(),
-              },
-            },
+            collectionId: id.toString(),
+          },
+          orderBy: {
+            order: "desc",
           },
           skip,
           take,
           include: {
-            Photo: true,
-            entity: {
+            media: {
               include: {
-                Favorite: true,
+                Photo: true,
+                entity: {
+                  include: {
+                    Favorite: true,
+                    EntityTag: {
+                      include: {
+                        tag: true,
+                      },
+                    },
+                  },
+                },
               },
             },
           },
         });
 
         res.json({
-          results,
+          results: results.map((item) => item.media),
           nextPage: results.length === take ? numPage + 1 : null,
         });
       } catch (err) {
