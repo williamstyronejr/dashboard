@@ -189,6 +189,149 @@ const AddToMenu: FC<{ selected: Array<any> }> = ({ selected }) => {
   );
 };
 
+const AsideDetails: FC<{
+  selected: Array<any>;
+  visible: boolean;
+  onClose: Function;
+}> = ({ visible, selected, onClose }) => {
+  const springsStyles = useSpring({
+    from: { width: "1px" },
+    to: { width: "300px" },
+    reverse: !visible,
+    reset: false,
+  });
+
+  // const handleClick = () => {
+  //   springApi.start({
+  //     from: {
+  //       width: "1px",
+  //     },
+  //     to: {
+  //       width: "200px",
+  //     },
+  //     reverse: visible,
+  //     reset: false,
+  //   });
+  // };
+
+  return (
+    <animated.aside
+      style={springsStyles}
+      className={`flex flex-col flex-nowrap h-full absolute z-10 right-0 md:relative  bg-custom-bg-light dark:bg-custom-bg-dark text-custom-text-light dark:text-custom-text-dark 
+      `}
+    >
+      {/* // ${infoVisible ? "w-72" : "w-0"} */}
+      {visible && !selected.length ? <div></div> : null}
+
+      {visible && selected.length ? (
+        <>
+          <div className="relative text-right shrink-0 py-2">
+            <button
+              className="inline mr-4 px-3 py-1 text-xl rounded-full transition hover:bg-custom-bg-btn-hover"
+              type="button"
+              title="Close Info"
+              onClick={() => onClose(false)}
+            >
+              X
+            </button>
+          </div>
+
+          <div className="py-4 px-2 flex-grow h-0 overflow-y-auto">
+            <div className="relative w-full h-48">
+              {selected.length === 1 && selected[0].type === "image" ? (
+                <Image
+                  fill
+                  className="rounded-lg object-contain"
+                  priority={true}
+                  src={selected[0].originalLink || selected[0].link}
+                  alt="Book covers"
+                />
+              ) : null}
+
+              {selected.length === 1 && selected[0].type === "story" ? (
+                <Image
+                  fill
+                  className="rounded-lg object-contain"
+                  priority={true}
+                  src={
+                    selected[0].CollectionMedia[0].media.originalLink ||
+                    selected[0].CollectionMedia[0].media.originalLink
+                  }
+                  alt="Media Preview"
+                />
+              ) : null}
+
+              {selected.length > 1 ? <div className="">MultiFiles</div> : null}
+            </div>
+
+            <div className="mt-4">
+              {selected.length === 1
+                ? selected[0].title
+                : `${selected.length} Selected`}
+            </div>
+
+            <hr className="my-4" />
+
+            {selected.length === 1 ? (
+              <div className="">
+                {selected[0].entity && selected[0].entity.EntityTag ? (
+                  <div className="mt-2 w-full">
+                    <ul className="flex flex-row flex-wrap px-2">
+                      {selected[0].entity.EntityTag.map((entityTag) => (
+                        <li
+                          key={`tag-${selected[0].id}-${entityTag.tag.id}`}
+                          className="bg-sky-500 rounded p-2 mr-4 mb-4 text-xs"
+                        >
+                          {capitalizeFirst(entityTag.tag.name)}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+
+                <div className="flex flex-row flex-nowrap my-2">
+                  <div className="w-3/6 text-gray-500">Size</div>
+                  <div className="w-3/6 text-right">
+                    {convertSize(selected[0].size)}
+                  </div>
+                </div>
+
+                <div className="flex flex-row flex-nowrap my-2">
+                  <div className="w-3/6 text-gray-500">Create</div>{" "}
+                  <div className="w-3/6 text-right">
+                    {dayjs(selected[0].createdAt).format("MMM DD, YYYY")}
+                  </div>
+                </div>
+
+                <div className="flex flex-row flex-nowrap my-2">
+                  <div className="w-3/6 text-gray-500">Modified</div>{" "}
+                  <div className="w-3/6 text-right">
+                    {dayjs(selected[0].updatedAt).format("MMM DD, YYYY")}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="flex flex-row flex-nowrap my-2">
+                  <div className="w-3/6 text-gray-500">Size </div>
+                  <div className="w-3/6 text-right">
+                    {convertSize(
+                      selected.reduce(
+                        (prev, curr) => (curr.size ? curr.size + prev : prev),
+                        0
+                      )
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </>
+      ) : null}
+    </animated.aside>
+  );
+};
+
 const FileList: FC<{
   queryUrl: string;
   heading: string;
@@ -201,24 +344,6 @@ const FileList: FC<{
   const [deleteMenu, setDeleteMenu] = useState(false);
   const [preview, setPreview] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState<Array<any>>([]);
-  const [springsStyles, springApi] = useSpring(() => {
-    from: {
-      width: "0px";
-    }
-  });
-
-  const handleClick = () => {
-    springApi.start({
-      from: {
-        width: "1px",
-      },
-      to: {
-        width: "100px",
-      },
-      reverse: infoVisible,
-      reset: false,
-    });
-  };
 
   // Close all headers menu when selected files change
   useEffect(() => {
@@ -370,7 +495,6 @@ const FileList: FC<{
 
           <HeaderButton
             onClick={() => {
-              handleClick();
               setInfoVisible((old) => !old);
             }}
           >
@@ -539,135 +663,11 @@ const FileList: FC<{
           </ul>
         </div>
 
-        <animated.aside
-          style={springsStyles}
-          className={`flex flex-col flex-nowrap h-full absolute z-10 right-0 md:relative  bg-custom-bg-light dark:bg-custom-bg-dark text-custom-text-light dark:text-custom-text-dark 
-          `}
-        >
-          {/* // ${infoVisible ? "w-72" : "w-0"} */}
-          {infoVisible && !selectedFiles.length ? <div></div> : null}
-
-          {infoVisible && selectedFiles.length ? (
-            <>
-              <div className="relative text-right shrink-0 py-2">
-                <button
-                  className="inline mr-4 px-3 py-1 text-xl rounded-full transition hover:bg-custom-bg-btn-hover"
-                  type="button"
-                  title="Close Info"
-                  onClick={() => setInfoVisible(false)}
-                >
-                  X
-                </button>
-              </div>
-
-              <div className="py-4 px-2 flex-grow h-0 overflow-y-auto">
-                <div className="relative w-full h-48">
-                  {selectedFiles.length === 1 &&
-                  selectedFiles[0].type === "image" ? (
-                    <Image
-                      fill
-                      className="rounded-lg object-contain"
-                      priority={true}
-                      src={
-                        selectedFiles[0].originalLink || selectedFiles[0].link
-                      }
-                      alt="Book covers"
-                    />
-                  ) : null}
-
-                  {selectedFiles.length === 1 &&
-                  selectedFiles[0].type === "story" ? (
-                    <Image
-                      fill
-                      className="rounded-lg object-contain"
-                      priority={true}
-                      src={
-                        selectedFiles[0].CollectionMedia[0].media
-                          .originalLink ||
-                        selectedFiles[0].CollectionMedia[0].media.originalLink
-                      }
-                      alt="Media Preview"
-                    />
-                  ) : null}
-
-                  {selectedFiles.length > 1 ? (
-                    <div className="">MultiFiles</div>
-                  ) : null}
-                </div>
-
-                <div className="mt-4">
-                  {selectedFiles.length === 1
-                    ? selectedFiles[0].title
-                    : `${selectedFiles.length} Selected`}
-                </div>
-
-                <hr className="my-4" />
-
-                {selectedFiles.length === 1 ? (
-                  <div className="">
-                    {selectedFiles[0].entity &&
-                    selectedFiles[0].entity.EntityTag ? (
-                      <div className="mt-2 w-full">
-                        <ul className="flex flex-row flex-wrap px-2">
-                          {selectedFiles[0].entity.EntityTag.map(
-                            (entityTag) => (
-                              <li
-                                key={`tag-${selectedFiles[0].id}-${entityTag.tag.id}`}
-                                className="bg-sky-500 rounded p-2 mr-4 mb-4 text-xs"
-                              >
-                                {capitalizeFirst(entityTag.tag.name)}
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                    ) : null}
-
-                    <div className="flex flex-row flex-nowrap my-2">
-                      <div className="w-3/6 text-gray-500">Size</div>
-                      <div className="w-3/6 text-right">
-                        {convertSize(selectedFiles[0].size)}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-row flex-nowrap my-2">
-                      <div className="w-3/6 text-gray-500">Create</div>{" "}
-                      <div className="w-3/6 text-right">
-                        {dayjs(selectedFiles[0].createdAt).format(
-                          "MMM DD, YYYY"
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-row flex-nowrap my-2">
-                      <div className="w-3/6 text-gray-500">Modified</div>{" "}
-                      <div className="w-3/6 text-right">
-                        {dayjs(selectedFiles[0].updatedAt).format(
-                          "MMM DD, YYYY"
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="flex flex-row flex-nowrap my-2">
-                      <div className="w-3/6 text-gray-500">Size </div>
-                      <div className="w-3/6 text-right">
-                        {convertSize(
-                          selectedFiles.reduce(
-                            (prev, curr) =>
-                              curr.size ? curr.size + prev : prev,
-                            0
-                          )
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </>
-          ) : null}
-        </animated.aside>
+        <AsideDetails
+          selected={selectedFiles}
+          onClose={() => setInfoVisible(false)}
+          visible={infoVisible}
+        />
       </div>
     </div>
   );
