@@ -6,6 +6,7 @@ import {
   ReactNode,
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import {
@@ -189,6 +190,38 @@ const AddToMenu: FC<{ selected: Array<any> }> = ({ selected }) => {
   );
 };
 
+const AsideVideo: FC<{ link: string }> = ({ link }) => {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  return (
+    <>
+      <div className=" group-hover: flex justify-center items-center h-full w-full absolute top-0 left-0">
+        <button
+          className="z-10 rounded-full px-3 py-2 text-white bg-black/60 hover:bg-black/80 border-slate-100 border-2"
+          type="button"
+          onClick={() => {
+            if (videoRef.current?.paused) {
+              videoRef.current.play();
+              setIsPlaying(true);
+            } else {
+              videoRef.current?.pause();
+              setIsPlaying(false);
+            }
+          }}
+        >
+          {isPlaying ? (
+            <i className="fas fa-play" />
+          ) : (
+            <i className="fas fa-pause" />
+          )}
+        </button>
+      </div>
+
+      <video ref={videoRef} loop className="w-full h-full" src={link} />
+    </>
+  );
+};
+
 const AsideDetails: FC<{
   selected: Array<any>;
   visible: boolean;
@@ -237,7 +270,7 @@ const AsideDetails: FC<{
           </div>
 
           <div className="py-4 px-2 flex-grow h-0 overflow-y-auto">
-            <div className="relative w-full h-48">
+            <div className="group relative w-full h-60">
               {selected.length === 1 && selected[0].type === "image" ? (
                 <Image
                   fill
@@ -248,7 +281,13 @@ const AsideDetails: FC<{
                 />
               ) : null}
 
-              {selected.length === 1 && selected[0].type === "story" ? (
+              {selected.length === 1 && selected[0].type === "video" ? (
+                <AsideVideo
+                  link={selected[0].originalLink || selected[0].link}
+                />
+              ) : null}
+
+              {selected.length === 1 && selected[0].CollectionMedia ? (
                 <Image
                   fill
                   className="rounded-lg object-contain"
