@@ -195,7 +195,7 @@ const AsideVideo: FC<{ link: string }> = ({ link }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   return (
     <>
-      <div className=" group-hover: flex justify-center items-center h-full w-full absolute top-0 left-0">
+      <div className="hidden group-hover:flex justify-center items-center h-full w-full absolute top-0 left-0">
         <button
           className="z-10 rounded-full px-3 py-2 text-white bg-black/60 hover:bg-black/80 border-slate-100 border-2"
           type="button"
@@ -218,6 +218,46 @@ const AsideVideo: FC<{ link: string }> = ({ link }) => {
       </div>
 
       <video ref={videoRef} loop className="w-full h-full" src={link} />
+    </>
+  );
+};
+
+const AsideMultiFile: FC<{ selected: Array<any> }> = ({ selected }) => {
+  const itemsToRender = [];
+  for (let i = 0; i < selected.length; i += 1) {
+    if (selected[i].type === "image") {
+      itemsToRender.push({
+        link: selected[i].originalLink || selected[i].link,
+        type: "image",
+        className: "",
+      });
+    }
+
+    if (itemsToRender.length === 2) {
+      itemsToRender[0].className = "-rotate-12 scale-75";
+      itemsToRender[1].className = "rotate-12 scale-75";
+    } else if (itemsToRender.length === 3) {
+      itemsToRender[0].className = "-rotate-12 scale-75";
+      itemsToRender[1].className = "rotate-12 scale-75";
+      itemsToRender[2].className = "z-10 scale-75";
+      break;
+    }
+  }
+
+  return (
+    <>
+      {itemsToRender.length
+        ? itemsToRender.map(({ link, className }, index) => (
+            <Image
+              key={`preview-${index}`}
+              fill
+              className={`rounded-lg object-contain origin-bottom ${className}`}
+              priority={true}
+              src={link}
+              alt="Media Preview"
+            />
+          ))
+        : null}
     </>
   );
 };
@@ -277,7 +317,7 @@ const AsideDetails: FC<{
                   className="rounded-lg object-contain"
                   priority={true}
                   src={selected[0].originalLink || selected[0].link}
-                  alt="Book covers"
+                  alt="Media Preview"
                 />
               ) : null}
 
@@ -300,7 +340,9 @@ const AsideDetails: FC<{
                 />
               ) : null}
 
-              {selected.length > 1 ? <div className="">MultiFiles</div> : null}
+              {selected.length > 1 ? (
+                <AsideMultiFile selected={selected} />
+              ) : null}
             </div>
 
             <div className="mt-4">
