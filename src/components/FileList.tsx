@@ -509,7 +509,7 @@ const FileList: FC<{
     loading: isLoading || isFetchingNextPage,
     hasNextPage: !!hasNextPage,
     onLoadMore: fetchNextPage,
-    disabled: false,
+    disabled: !!error,
     rootMargin: "0px 0px 200px 0px",
   });
 
@@ -643,7 +643,7 @@ const FileList: FC<{
                         <div
                           className={`block relative ${
                             listMode === "grid" ? "w-full" : "w-48"
-                          } h-48 mx-auto shrink-0`}
+                          } h-48 shrink-0`}
                         >
                           {file.CollectionMedia ? (
                             <Image
@@ -691,24 +691,27 @@ const FileList: FC<{
                           ) : null}
                         </div>
 
-                        {file.entity && file.entity.EntityTag ? (
-                          <ul
-                            className={`${
-                              listMode === "grid"
-                                ? "hidden"
-                                : "flex flex-row flex-wrap"
-                            }`}
-                          >
-                            {file.entity.EntityTag.map((entityTag) => (
+                        <ul
+                          className={`${
+                            listMode === "grid"
+                              ? "hidden"
+                              : "flex flex-row flex-wrap"
+                          }`}
+                        >
+                          {file.entity &&
+                            file.entity.EntityTag &&
+                            file.entity.EntityTag.map((entityTag) => (
                               <li
                                 key={`tag-${file.id}-${entityTag.tag.id}`}
-                                className="bg-sky-500 rounded py-2 px-4 mr-4 mb-4"
+                                className="bg-custom-bg-light dark:bg-[#343434] rounded py-2 px-4 mr-4 mb-4"
                               >
                                 {capitalizeFirst(entityTag.tag.name)}
                               </li>
                             ))}
-                          </ul>
-                        ) : null}
+                        </ul>
+                      </button>
+
+                      <div className="w-full">
                         <div
                           className={`${
                             listMode === "grid"
@@ -718,7 +721,7 @@ const FileList: FC<{
                         >
                           {file.title || file.fileName}
                         </div>
-                      </button>
+                      </div>
                     </li>
                   ))
                 )
