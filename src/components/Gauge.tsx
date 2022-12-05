@@ -6,7 +6,7 @@ type Props = {
 };
 
 const parentStyles = {
-  width: "100%",
+  // width: "100%",
 };
 
 const svgStyles = {};
@@ -31,10 +31,9 @@ const Gauge: React.FC<Props> = ({
   return (
     <div style={parentStyles} className={`${className}`}>
       <svg
-        className="svgGauge"
-        viewBox="0 0 120 120"
+        className="svgGauge mx-auto"
         xmlns="http://www.w3.org/2000/svg"
-        transform="rotate(90)"
+        transform="rotate(90) scale(1.5)"
       >
         <circle
           className="circle gaugeBG"
