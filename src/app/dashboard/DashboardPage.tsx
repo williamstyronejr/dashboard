@@ -1,5 +1,5 @@
 "use client";
-import { FC, useState } from "react";
+import { FC, ReactNode, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -8,17 +8,135 @@ import { useReaderContext } from "../../context/readerContext";
 import { convertSize } from "../../utils/utils";
 dayjs.extend(relativeTime);
 
+const CardTile: FC<{ children: ReactNode }> = ({ children }) => (
+  <div className="flex flex-col flex-nowrap w-full max-w-sm mx-auto h-80 mb-4 rounded-2xl bg-white">
+    {children}
+  </div>
+);
 const DashboardPage = () => {
   const [infoType, setInfoType] = useState("details");
   const { AddItemToList } = useReaderContext();
   const { data, isFetching } = useQuery(["dashboard"], async () => {
     const res = await fetch(`/api/dashboard`);
-    const body = await res.json();
-    return body;
+    if (res.ok) return await res.json();
+    throw new Error("An error occurred during request, please try again.");
   });
 
   return (
-    <section className="flex flex-col-reverse md:flex-row flex-nowrap flex-grow font-bold p-2 overflow-y-auto">
+    <section className="p-2 overflow-y-auto bg-gradient-to-r from-cyan-500 to-blue-500">
+      <header className="">
+        <h2 className="text-center font-bold">Welcome Back, username</h2>
+      </header>
+
+      <div className="flex flex-col flex-nowrap">
+        <CardTile>
+          <h3>Files</h3>
+          <ul className="overflow-y-auto">
+            {data
+              ? data.mostRecentFiles.map((item) => (
+                  <li
+                    key={`item-${item.id}`}
+                    className="flex flex-row flex-nowrap"
+                  >
+                    <div className="text-4xl mr-4">
+                      {item.type === "audio" ? (
+                        <i className="fas fa-file-audio" />
+                      ) : null}
+                    </div>
+
+                    <h4
+                      title={item.title || item.fileName}
+                      className="flex-grow mx-2 whitespace-nowrap text-ellipsis overflow-hidden"
+                    >
+                      {item.title || item.fileName}
+                    </h4>
+
+                    <div className="hidden md:block whitespace-nowrap">
+                      {dayjs(item.createAt).format("ddd, DD MMM YYYY")}
+                    </div>
+                  </li>
+                ))
+              : null}
+          </ul>
+        </CardTile>
+
+        <CardTile>
+          <h3 className="">Storage</h3>
+
+          <div className="flex-grow h-0">
+            <Gauge
+              className="h-full w-40"
+              value={data ? data.usedSpace / data.totalSpace : 0}
+            />
+            <div className="flex flex-row flex-nowrap justify-between">
+              <div>
+                <div className="">{convertSize(data ? data.usedSpace : 0)}</div>
+                <span className="text-gray-500 font-normal">Used Space</span>
+              </div>
+
+              <div>
+                <div>{convertSize(data ? data.totalSpace : 0)}</div>
+                <span className="text-gray-500 font-normal">Total Space</span>
+              </div>
+            </div>
+          </div>
+        </CardTile>
+
+        <CardTile>
+          <h3 className="bg-slate-200 py-4">Recent Activity </h3>
+
+          <ul className="flex flex-col flex-nowrap flex-grow h-0 px-2 overflow-y-auto">
+            {data
+              ? data.latestActivity.map((item: any) => (
+                  <li
+                    key={`activity-${item.id}`}
+                    className="py-2 px-4 rounded-lg"
+                  >
+                    <div>
+                      <span
+                        title={item.actionItem}
+                        className="block font-normal whitespace-nowrap text-ellipsis overflow-hidden"
+                      >
+                        {item.actionItem}
+                      </span>
+
+                      <div className="text-gray-500 font-normal text-sm">
+                        {item.actionType === "delete" ? "Deleted " : null}
+                        <span>{dayjs(item.createdAt).fromNow()}</span>
+                      </div>
+                    </div>
+
+                    <hr className="mt-2" />
+                  </li>
+                ))
+              : null}
+            {data && data.latestActivity.length === 0 ? (
+              <li>No Activities</li>
+            ) : null}
+          </ul>
+        </CardTile>
+
+        <CardTile>
+          <h3 className="py-2">Settings</h3>
+        </CardTile>
+      </div>
+    </section>
+  );
+};
+
+const OldDashboardPage = () => {
+  const [infoType, setInfoType] = useState("details");
+  const { AddItemToList } = useReaderContext();
+  const { data, isFetching } = useQuery(["dashboard"], async () => {
+    const res = await fetch(`/api/dashboard`);
+    const body = await res.json();
+    // return body;
+    throw new Error();
+    return {};
+  });
+
+  return (
+    <section className="flex flex-col-reverse md:flex-row flex-nowrap h-full font-bold p-2 overflow-y-auto">
       <div className="block md:flex-grow md:w-0 mt-6 md:mt-0 px-0 md:px-4 bg-custom-bg-light dark:bg-custom-bg-dark text-custom-text-light dark:text-custom-text-dark">
         <div className="">
           <h3 className="my-4 text-">Recent Files</h3>

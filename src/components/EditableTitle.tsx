@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { useRef, FC, useState } from "react";
 import useDetectClick from "../hooks/useDetectClick";
 
@@ -18,3 +19,5 @@ const EditableTitle: FC<{ title: string }> = ({ title }) => {
     </div>
   );
 };
+
+export default EditableTitle;
