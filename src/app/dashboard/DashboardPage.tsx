@@ -6,16 +6,17 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import Gauge from "../../components/Gauge";
 import { useReaderContext } from "../../context/readerContext";
 import { convertSize } from "../../utils/utils";
+import Link from "next/link";
 dayjs.extend(relativeTime);
 
 const CardTile: FC<{ children: ReactNode }> = ({ children }) => (
-  <div className="flex flex-col flex-nowrap w-full max-w-sm mx-auto h-80 mb-4 rounded-2xl bg-white">
+  <div className="flex flex-col flex-nowrap w-full mx-auto h-80 mb-4 md:mb-0 rounded-2xl overflow-hidden bg-slate-200 hover:scale-105 transition-transform">
     {children}
   </div>
 );
+
 const DashboardPage = () => {
   const [infoType, setInfoType] = useState("details");
-  const { AddItemToList } = useReaderContext();
   const { data, isFetching } = useQuery(["dashboard"], async () => {
     const res = await fetch(`/api/dashboard`);
     if (res.ok) return await res.json();
@@ -23,52 +24,63 @@ const DashboardPage = () => {
   });
 
   return (
-    <section className="p-2 overflow-y-auto bg-gradient-to-r from-cyan-500 to-blue-500">
+    <section className="min-h-full p-2 overflow-y-auto bg-gradient-to-r from-cyan-500 to-blue-500">
       <header className="">
         <h2 className="text-center font-bold">Welcome Back, username</h2>
       </header>
 
-      <div className="flex flex-col flex-nowrap">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4 max-w-3xl mx-auto">
         <CardTile>
-          <h3>Files</h3>
-          <ul className="overflow-y-auto">
+          <h3 className="font-bold">
+            <Link
+              href="/media"
+              className="block hover:bg-slate-400 py-3 px-2 transition-colors"
+            >
+              Files
+            </Link>
+          </h3>
+
+          <ul className="bg-white flex-grow px-4 overflow-y-auto divide-y">
             {data
               ? data.mostRecentFiles.map((item) => (
-                  <li
-                    key={`item-${item.id}`}
-                    className="flex flex-row flex-nowrap"
-                  >
-                    <div className="text-4xl mr-4">
-                      {item.type === "audio" ? (
-                        <i className="fas fa-file-audio" />
-                      ) : null}
-                    </div>
-
-                    <h4
-                      title={item.title || item.fileName}
-                      className="flex-grow mx-2 whitespace-nowrap text-ellipsis overflow-hidden"
+                  <>
+                    <li
+                      key={`item-${item.id}`}
+                      className="flex flex-row flex-nowrap py-3"
                     >
-                      {item.title || item.fileName}
-                    </h4>
+                      <div className="text-4xl mr-4">
+                        {item.type === "audio" ? (
+                          <i className="fas fa-file-audio" />
+                        ) : null}
+                      </div>
 
-                    <div className="hidden md:block whitespace-nowrap">
-                      {dayjs(item.createAt).format("ddd, DD MMM YYYY")}
-                    </div>
-                  </li>
+                      <h4
+                        title={item.title || item.fileName}
+                        className="flex-grow mx-2 whitespace-nowrap text-ellipsis overflow-hidden"
+                      >
+                        {item.title || item.fileName}
+                      </h4>
+
+                      <div className="hidden md:block whitespace-nowrap">
+                        {dayjs(item.createAt).format("ddd, DD MMM YYYY")}
+                      </div>
+                    </li>
+                  </>
                 ))
               : null}
           </ul>
         </CardTile>
 
         <CardTile>
-          <h3 className="">Storage</h3>
+          <h3 className="font-bold px-2 py-3">Storage</h3>
 
-          <div className="flex-grow h-0">
+          <div className="flex-grow h-0 bg-white">
             <Gauge
-              className="h-full w-40"
+              className="mt-4"
               value={data ? data.usedSpace / data.totalSpace : 0}
             />
-            <div className="flex flex-row flex-nowrap justify-between">
+
+            <div className="flex flex-row flex-nowrap justify-between px-4 py-4">
               <div>
                 <div className="">{convertSize(data ? data.usedSpace : 0)}</div>
                 <span className="text-gray-500 font-normal">Used Space</span>
@@ -83,9 +95,9 @@ const DashboardPage = () => {
         </CardTile>
 
         <CardTile>
-          <h3 className="bg-slate-200 py-4">Recent Activity </h3>
+          <h3 className="font-bold bg-slate-200 py-3 px-2">Recent Activity </h3>
 
-          <ul className="flex flex-col flex-nowrap flex-grow h-0 px-2 overflow-y-auto">
+          <ul className="flex flex-col flex-nowrap flex-grow px-2 overflow-y-auto bg-white">
             {data
               ? data.latestActivity.map((item: any) => (
                   <li
@@ -117,7 +129,16 @@ const DashboardPage = () => {
         </CardTile>
 
         <CardTile>
-          <h3 className="py-2">Settings</h3>
+          <h3 className="font-bold px-2 py-3 flex-grow">
+            <Link href="/settings" className="block h-full">
+              <div className="ml-6">
+                <i className="block fas fa-cog text-8xl" />
+                <div className="block ml-4  font-semibold text-2xl">
+                  Settings
+                </div>
+              </div>
+            </Link>
+          </h3>{" "}
         </CardTile>
       </div>
     </section>
