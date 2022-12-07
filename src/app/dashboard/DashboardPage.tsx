@@ -10,7 +10,7 @@ import Link from "next/link";
 dayjs.extend(relativeTime);
 
 const CardTile: FC<{ children: ReactNode }> = ({ children }) => (
-  <div className="flex flex-col flex-nowrap w-full mx-auto h-80 mb-4 md:mb-0 rounded-2xl overflow-hidden bg-slate-200 hover:scale-105 transition-transform">
+  <div className="flex flex-col flex-nowrap w-full max-w-sm mx-auto h-80 mb-4 md:mb-0 rounded-2xl overflow-hidden bg-slate-200 hover:scale-105 transition-transform">
     {children}
   </div>
 );
@@ -29,7 +29,7 @@ const DashboardPage = () => {
         <h2 className="text-center font-bold">Welcome Back, username</h2>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-4 max-w-3xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8 max-w-3xl mx-auto">
         <CardTile>
           <h3 className="font-bold">
             <Link
