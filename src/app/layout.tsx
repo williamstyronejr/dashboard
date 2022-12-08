@@ -1,5 +1,6 @@
 import "../../styles/globals.css";
 import Providers from "./provider";
+import MainHeader from "../components/ui/MainHeader";
 
 export default function RootLayout({
   children,
@@ -8,8 +9,9 @@ export default function RootLayout({
 }) {
   return (
     <html>
-      <body data-theme="light" className="h-full">
+      <body data-theme="light" className="flex flex-col flex-nowrap">
         <Providers>
+          <MainHeader />
           <main className="h-full">{children}</main>
         </Providers>
       </body>
