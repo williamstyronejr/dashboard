@@ -2,11 +2,11 @@
 import { FC, ReactNode, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import Link from "next/link";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Gauge from "../../components/Gauge";
 import { useReaderContext } from "../../context/readerContext";
 import { convertSize } from "../../utils/utils";
-import Link from "next/link";
 dayjs.extend(relativeTime);
 
 const CardTile: FC<{ children: ReactNode }> = ({ children }) => (
@@ -16,7 +16,6 @@ const CardTile: FC<{ children: ReactNode }> = ({ children }) => (
 );
 
 const DashboardPage = () => {
-  const [infoType, setInfoType] = useState("details");
   const { data, isFetching } = useQuery(["dashboard"], async () => {
     const res = await fetch(`/api/dashboard`);
     if (res.ok) return await res.json();
@@ -24,11 +23,7 @@ const DashboardPage = () => {
   });
 
   return (
-    <section className="min-h-full p-2 overflow-y-auto bg-gradient-to-r from-cyan-500 to-blue-500">
-      <header className="">
-        <h2 className="text-center font-bold">Welcome Back, username</h2>
-      </header>
-
+    <section className="min-h-full p-2 pt-12 overflow-y-auto bg-gradient-to-r from-cyan-500 to-blue-500">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8 max-w-3xl mx-auto">
         <CardTile>
           <h3 className="font-bold">
