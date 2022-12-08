@@ -5,7 +5,7 @@ import Reader from "../../components/Reader";
 
 const StorageLayout = ({ children }: { children: ReactNode }) => {
   return (
-    <div className="flex flex-row flex-nowrap h-full text-custom-text-light dark:text-custom-text-dark">
+    <div className="flex flex-row flex-nowrap h-full text-custom-text-light border-t-2 dark:text-custom-text-dark">
       <Aside />
 
       <div className="flex flex-col flex-nowrap flex-grow relative w-0 overflow-x-hidden bg-custom-bg-off-light dark:bg-custom-bg-off-dark">
