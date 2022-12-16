@@ -1,14 +1,15 @@
-import { prisma } from "../../utils/db";
+import { prisma } from "../../../utils/db";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { Media, Collection, CollectionMedia } from "@prisma/client";
+import { Media, Collection, CollectionMedia, Tag } from "@prisma/client";
 
 type ResponseData = {
-  nextPage: number | null;
-  results: Array<
+  collections: Array<
     Collection & {
       CollectionMedia: (CollectionMedia & { media: Media })[];
     }
   >;
+  tags: Array<Tag>;
+  medias: Media[];
 };
 
 type InputError = {
@@ -20,38 +21,21 @@ export default async function requestHandler(
   res: NextApiResponse<ResponseData | InputError>
 ) {
   const {
-    query: { page, limit, type, tags, q },
+    query: { type, q },
     method,
   } = req;
 
   if (method !== "GET") return res.status(401);
 
   try {
-    if (!page || !limit) {
-      return res
-        .status(400)
-        .send({ message: "Bad inputs: page and limit are required" });
-    }
-
-    const numPage = parseInt(page.toString());
-    const take = parseInt(limit.toString()) || 10;
-    const skip = numPage * take;
-
-    if (Number.isNaN(take) || Number.isNaN(skip)) {
-      return res
-        .status(400)
-        .send({ message: "Page and limit must be numbers" });
-    }
-
-    const results = await prisma.collection.findMany({
+    const collections = await prisma.collection.findMany({
       where: {
         title: {
           contains: q?.toString(),
         },
         type: type ? type.toString() : undefined,
       },
-      skip,
-      take,
+      take: 3,
       include: {
         entity: {
           include: {
@@ -73,9 +57,28 @@ export default async function requestHandler(
       },
     });
 
+    const medias = await prisma.media.findMany({
+      where: {
+        title: {
+          contains: q?.toString(),
+        },
+      },
+      take: 3,
+    });
+
+    const tags = await prisma.tag.findMany({
+      where: {
+        name: {
+          contains: q?.toString(),
+        },
+      },
+      take: 8,
+    });
+
     res.json({
-      results: JSON.parse(JSON.stringify(results)),
-      nextPage: results.length === take ? numPage + 1 : null,
+      collections: JSON.parse(JSON.stringify(collections)),
+      tags: JSON.parse(JSON.stringify(tags)),
+      medias: JSON.parse(JSON.stringify(medias)),
     });
   } catch (err) {
     console.log(err);
